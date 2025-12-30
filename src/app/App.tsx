@@ -17,6 +17,7 @@ import MovieListPage from '@/pages/MovieList'
 import MovieCreatePage from '@/pages/MovieCreate'
 import MovieResultPage from '@/pages/MovieResult'
 import VideoViewPage from '@/pages/VideoView'
+import MapPage from '@/pages/Map'
 import './App.css'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/profile-setup" element={<ProfileSetupPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/spots/:id" element={<SpotDetailPage />} />
         <Route path="/capture" element={<CapturePage />} />
         <Route path="/capture/success" element={<CaptureSuccessPage />} />

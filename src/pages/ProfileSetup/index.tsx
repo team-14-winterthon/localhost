@@ -198,10 +198,10 @@ export default function ProfileSetupPage() {
     try {
       setIsLoading(true);
 
-      await authApi.setupProfile({
+      // Mock profile setup for development
+      localStorage.setItem('userProfile', JSON.stringify({
         nickname: nickname.trim(),
-        password: password.trim(),
-      });
+      }));
 
       toast.success('프로필이 설정되었습니다');
       navigate('/home', { replace: true });

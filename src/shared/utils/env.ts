@@ -3,10 +3,6 @@
  */
 
 export const env = {
-  supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL,
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-  },
   googleMaps: {
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   },
