@@ -1,25 +1,28 @@
-import { apiClient } from '@/shared/api/client'
+/**
+ * Auth API
+ * API 명세서 기준
+ */
+
+import { api } from '@/shared/api/client'
+import type {
+  GoogleLoginRequest,
+  GoogleLoginResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  LogoutRequest,
+  LogoutResponse,
+} from './types'
 
 export const authApi = {
-  async getGoogleAuthUrl(): Promise<{ url: string }> {
-    const response = await apiClient.get<{ url: string }>('/auth/google/url', { skipAuth: true })
-    return response
-  },
+  // 구글 로그인
+  googleLogin: (data: GoogleLoginRequest) =>
+    api.post<GoogleLoginResponse>('/auth/google', data),
 
-  async handleGoogleCallback(code: string): Promise<{ access_token: string }> {
-    const response = await apiClient.post<{ access_token: string }>(
-      '/auth/google/callback',
-      { code },
-      { skipAuth: true }
-    )
-    return response
-  },
+  // 토큰 갱신
+  refreshToken: (data: RefreshTokenRequest) =>
+    api.post<RefreshTokenResponse>('/auth/refresh', data),
 
-  async signOut(): Promise<void> {
-    try {
-      await apiClient.post('/auth/logout')
-    } finally {
-      localStorage.removeItem('authToken')
-    }
-  },
+  // 로그아웃
+  logout: (data: LogoutRequest) =>
+    api.post<LogoutResponse>('/auth/logout', data),
 }
