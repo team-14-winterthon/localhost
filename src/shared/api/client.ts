@@ -16,18 +16,21 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions extends RequestInit {
-  token?: string
+  skipAuth?: boolean
 }
 
-export async function apiClient<T = unknown>(
+async function request<T = unknown>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { token, headers, ...fetchOptions } = options
+  const { skipAuth, headers, ...fetchOptions } = options
 
   const url = env.api.baseUrl
     ? `${env.api.baseUrl}${endpoint}`
     : endpoint
+
+  // Get token from localStorage
+  const token = !skipAuth ? localStorage.getItem('authToken') : null
 
   const response = await fetch(url, {
     ...fetchOptions,
@@ -50,24 +53,27 @@ export async function apiClient<T = unknown>(
   return response.json()
 }
 
-export const api = {
+export const apiClient = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
-    apiClient<T>(endpoint, { ...options, method: 'GET' }),
+    request<T>(endpoint, { ...options, method: 'GET' }),
 
   post: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
-    apiClient<T>(endpoint, {
+    request<T>(endpoint, {
       ...options,
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   put: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
-    apiClient<T>(endpoint, {
+    request<T>(endpoint, {
       ...options,
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
-    apiClient<T>(endpoint, { ...options, method: 'DELETE' }),
+    request<T>(endpoint, { ...options, method: 'DELETE' }),
 }
+
+// Legacy export for backwards compatibility
+export const api = apiClient

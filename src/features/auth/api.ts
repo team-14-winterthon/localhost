@@ -1,26 +1,25 @@
-import { supabase } from '@/shared/api/supabase'
-import type { User } from './types'
+import { apiClient } from '@/shared/api/client'
 
 export const authApi = {
-  async login(nickname: string): Promise<User> {
-    const { data, error } = await supabase
-      .from('users')
-      .insert({ nickname })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+  async getGoogleAuthUrl(): Promise<{ url: string }> {
+    const response = await apiClient.get<{ url: string }>('/auth/google/url', { skipAuth: true })
+    return response
   },
 
-  async getCurrentUser(userId: string): Promise<User | null> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
+  async handleGoogleCallback(code: string): Promise<{ access_token: string }> {
+    const response = await apiClient.post<{ access_token: string }>(
+      '/auth/google/callback',
+      { code },
+      { skipAuth: true }
+    )
+    return response
+  },
 
-    if (error) return null
-    return data
+  async signOut(): Promise<void> {
+    try {
+      await apiClient.post('/auth/logout')
+    } finally {
+      localStorage.removeItem('authToken')
+    }
   },
 }
