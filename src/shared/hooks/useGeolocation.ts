@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Geolocation, Position } from '@capacitor/geolocation'
+import { Geolocation } from '@capacitor/geolocation'
+import type { Position } from '@capacitor/geolocation'
 
 export function useGeolocation() {
   const [position, setPosition] = useState<Position | null>(null)
