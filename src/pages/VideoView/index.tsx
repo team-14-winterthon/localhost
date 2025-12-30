@@ -2,8 +2,9 @@ import styled from "@emotion/styled";
 import { theme } from "@/shared/styles/theme";
 import { H4, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { moviesApi, type MovieDetail } from "@/features/videoGen/api";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.base.black};
@@ -20,7 +21,7 @@ const VideoBackground = styled.div`
   height: 100%;
   z-index: 0;
 
-  img {
+  video, img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -71,6 +72,7 @@ const BackButton = styled.button`
   img {
     width: 100%;
     height: 100%;
+    filter: brightness(0) invert(1);
   }
 
   &:active {
@@ -140,16 +142,84 @@ const VideoTitle = styled(P2)`
 
 export default function VideoViewPage() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [isLiked, setIsLiked] = useState(false);
+  const [movie, setMovie] = useState<MovieDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadMovie = async () => {
+      if (!id) {
+        console.error("Movie ID not found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await moviesApi.getById(id);
+        setMovie(data);
+      } catch (error) {
+        console.error("Failed to load movie:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovie();
+  }, [id]);
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
   };
 
+  if (loading) {
+    return (
+      <PageContainer>
+        <ContentOverlay>
+          <MainContent>
+            <P2 style={{ color: "white", textAlign: "center" }}>로딩 중...</P2>
+          </MainContent>
+        </ContentOverlay>
+        <Navbar />
+      </PageContainer>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <PageContainer>
+        <ContentOverlay>
+          <TopBar>
+            <BackButton onClick={() => navigate(-1)}>
+              <img src="/images/expand_left.svg" alt="뒤로가기" />
+            </BackButton>
+          </TopBar>
+          <MainContent>
+            <P2 style={{ color: "white", textAlign: "center" }}>
+              영화를 찾을 수 없습니다
+            </P2>
+          </MainContent>
+        </ContentOverlay>
+        <Navbar />
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
       <VideoBackground>
-        <img src="/images/video-background.jpg" alt="Video" />
+        {movie.videoUrl ? (
+          <video
+            src={movie.videoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        ) : (
+          <img src="/images/video-background.jpg" alt={movie.title} />
+        )}
       </VideoBackground>
       <GradientOverlay />
 
@@ -179,8 +249,8 @@ export default function VideoViewPage() {
           </RightActions>
 
           <VideoInfo>
-            <CreatorName>농약 두봉지</CreatorName>
-            <VideoTitle>레전드 부산소마고의 영화</VideoTitle>
+            <CreatorName>{movie.userId}</CreatorName>
+            <VideoTitle>{movie.title}</VideoTitle>
           </VideoInfo>
         </MainContent>
       </ContentOverlay>
