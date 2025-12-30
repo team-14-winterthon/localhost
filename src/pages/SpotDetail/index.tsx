@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import styled from '@emotion/styled'
-import { spotsApi } from '@/features/spots/api'
-import type { Spot } from '@/features/spots/types'
+import { useSpot } from '@/features/spots/queries'
+import { useLocationStore } from '@/shared/stores'
 import { H2, H4, P2, P3 } from '@/shared/components/Typography'
-import { useGeolocation } from '@/shared/hooks/useGeolocation'
 import { calculateDistance } from '@/shared/utils/distance'
 
 const Container = styled.div`
@@ -147,31 +146,20 @@ const LoadingContainer = styled.div`
 export default function SpotDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { position } = useGeolocation()
-  const [spot, setSpot] = useState<Spot | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [visitCount, setVisitCount] = useState(0)
 
+  // 전역 상태 사용
+  const { position, fetchPosition } = useLocationStore()
+  const { data: spot, isLoading } = useSpot(id || '')
+
+  // 위치 정보 가져오기
   useEffect(() => {
-    const loadSpotDetail = async () => {
-      if (!id) return
+    fetchPosition()
+  }, [fetchPosition])
 
-      try {
-        setLoading(true)
-        const data = await spotsApi.getById(id)
-        setSpot(data)
-        setVisitCount(Math.floor(Math.random() * 100))
-      } catch (error) {
-        console.error('Spot 상세 로드 실패:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  // 임시 방문 횟수 (추후 API 연동)
+  const visitCount = 42
 
-    loadSpotDetail()
-  }, [id])
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingContainer>로딩 중...</LoadingContainer>
   }
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import toast from 'react-hot-toast';
 import { authApi } from '@/features/auth/api';
+import { useAuthStore } from '@/shared/stores';
 import { theme } from '@/shared/styles/theme';
 
 const Container = styled.div`
@@ -25,6 +26,7 @@ const LoadingText = styled.p`
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const login = useAuthStore((state) => state.login);
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -44,10 +46,10 @@ export default function AuthCallbackPage() {
         }
 
         // Exchange code for access token
-        const { access_token } = await authApi.handleGoogleCallback(code);
+        const { access_token, user } = await authApi.handleGoogleCallback(code);
 
-        // Save token to localStorage
-        localStorage.setItem('authToken', access_token);
+        // Save to global store
+        login(access_token, user);
 
         // Redirect to home
         toast.success('로그인 되었습니다');
@@ -60,7 +62,7 @@ export default function AuthCallbackPage() {
     };
 
     handleCallback();
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, login]);
 
   return (
     <Container>

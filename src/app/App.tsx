@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '@emotion/react'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import { queryClient } from '@/shared/lib/queryClient'
 import { theme } from '@/shared/styles/theme'
 import SplashPage from '@/pages/Splash'
 import AuthCallbackPage from '@/pages/AuthCallback'
@@ -22,8 +24,9 @@ import './App.css'
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Routes>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <Routes>
         <Route path="/" element={<SplashPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/profile-setup" element={<ProfileSetupPage />} />
@@ -41,9 +44,10 @@ function App() {
         <Route path="/video/view/:id" element={<VideoViewPage />} />
         <Route path="/movie/create" element={<MovieCreatePage />} />
         <Route path="/movie/result" element={<MovieResultPage />} />
-      </Routes>
-      <Toaster position="top-center" />
-    </ThemeProvider>
+        </Routes>
+        <Toaster position="top-center" />
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 

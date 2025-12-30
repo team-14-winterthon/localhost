@@ -5,8 +5,8 @@ import Navbar from '@/shared/components/Navbar'
 import LeafletMap from '@/shared/components/LeafletMap'
 import BottomSheet from '@/shared/components/BottomSheet'
 import SpotCard from '@/features/spots/components/SpotCard'
-import { useGeolocation } from '@/shared/hooks/useGeolocation'
-import { spotsApi } from '@/features/spots/api'
+import { useLocationStore } from '@/shared/stores'
+import { useSpots } from '@/features/spots/queries'
 import type { Spot, Memory } from '@/features/spots/types'
 import type { MapMarker } from '@/shared/components/LeafletMap/types'
 import { calculateDistance } from '@/shared/utils/distance'
@@ -324,11 +324,18 @@ const ActionButton = styled.button`
 
 export default function MapPage() {
   const navigate = useNavigate()
-  const { position, loading: geoLoading } = useGeolocation()
-  const [spots, setSpots] = useState<Spot[]>([])
-  const [loading, setLoading] = useState(true)
+
+  // 전역 상태 사용
+  const { position, loading: geoLoading, fetchPosition } = useLocationStore()
+  const { data: spots = [], isLoading: loading } = useSpots()
+
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null)
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
+
+  // 위치 정보 가져오기
+  useEffect(() => {
+    fetchPosition()
+  }, [fetchPosition])
 
   // Mock Memories Data
   const memories: Memory[] = [
@@ -368,23 +375,6 @@ export default function MapPage() {
   const center = position
     ? { lat: position.coords.latitude, lng: position.coords.longitude }
     : { lat: 37.5665, lng: 126.978 } // 서울 기본
-
-  // Spots 데이터 로드
-  useEffect(() => {
-    const loadSpots = async () => {
-      try {
-        setLoading(true)
-        const data = await spotsApi.getAll()
-        setSpots(data)
-      } catch (error) {
-        console.error('Spots 로드 실패:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSpots()
-  }, [])
 
   // 마커 생성
   const markers: MapMarker[] = [
