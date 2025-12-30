@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
 import Navbar from "@/shared/components/Navbar";
@@ -6,10 +5,8 @@ import LeafletMap from "@/shared/components/LeafletMap";
 import BottomSheet from "@/shared/components/BottomSheet";
 import SpotCard from "@/features/spots/components/SpotCard";
 import { useGeolocation } from "@/shared/hooks/useGeolocation";
-import { placesApi } from "@/features/spots/api";
-import { authPhotosApi } from "@/features/media/api";
-import type { Place } from "@/features/spots/types";
-import type { AuthPhoto } from "@/features/media/api";
+import { usePlaces, useMyMemories } from "@/shared/hooks";
+import { useMapStore } from "@/shared/stores";
 import type { MapMarker } from "@/shared/components/LeafletMap/types";
 import { calculateDistance } from "@/shared/utils/distance";
 import { H3, P3 } from "@/shared/components/Typography";
@@ -254,41 +251,38 @@ const MemoryOverlay = styled.p`
   text-overflow: ellipsis;
 `;
 
+const MemoryMetaInfo = styled.div`
+  display: flex;
+  gap: 8px;
+  color: ${({ theme }) => theme.colors.gray[500]};
+  font-size: 12px;
+  margin-top: 12px;
+`;
+
 export default function MapPage() {
   const navigate = useNavigate();
   const { position, loading: geoLoading } = useGeolocation();
-  const [places, setPlaces] = useState<Place[]>([]);
-  const [memories, setMemories] = useState<AuthPhoto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [selectedMemory, setSelectedMemory] = useState<AuthPhoto | null>(null);
-  const [viewMode, setViewMode] = useState<string>("전체보기");
+
+  // React Query로 데이터 fetch
+  const { data: places = [], isLoading: placesLoading } = usePlaces();
+  const { data: memories = [], isLoading: memoriesLoading } = useMyMemories();
+
+  // Zustand로 UI 상태 관리
+  const {
+    selectedPlace,
+    selectedMemory,
+    viewMode,
+    selectPlace,
+    selectMemory,
+    setViewMode,
+  } = useMapStore();
+
+  const loading = placesLoading || memoriesLoading;
 
   // 현재 위치 기준 중심 좌표
   const center = position
     ? { lat: position.coords.latitude, lng: position.coords.longitude }
     : { lat: 37.5665, lng: 126.978 }; // 서울 기본
-
-  // Places 및 Memories 데이터 로드
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [placesData, memoriesData] = await Promise.all([
-          placesApi.getAll(),
-          authPhotosApi.getMyMemories(),
-        ]);
-        setPlaces(placesData);
-        setMemories(memoriesData);
-      } catch (error) {
-        console.error("데이터 로드 실패:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
 
   // 마커 생성
   const markers: MapMarker[] = [
@@ -312,10 +306,9 @@ export default function MapPage() {
       position: { lat: place.latitude, lng: place.longitude },
       type: "spot" as const,
       title: place.name,
-      showLabel: selectedPlace?.id === place.id, // 선택된 place만 라벨 표시
+      showLabel: selectedPlace?.id === place.id,
       onClick: () => {
-        setSelectedMemory(null);
-        setSelectedPlace(place);
+        selectPlace(place);
       },
     })),
   ];
@@ -324,7 +317,6 @@ export default function MapPage() {
   const placesWithDistance = places
     .map((place) => ({
       ...place,
-      // SpotCard에서 사용하는 필드들 추가
       lat: place.latitude,
       lng: place.longitude,
       distance: position
@@ -342,22 +334,20 @@ export default function MapPage() {
     if (markerId === "current-location") return;
     const place = places.find((p) => p.id === markerId);
     if (place) {
-      setSelectedMemory(null);
-      setSelectedPlace(place);
+      selectPlace(place);
     }
   };
 
   const handlePlaceCardClick = (placeId: string) => {
     const place = places.find((p) => p.id === placeId);
     if (place) {
-      setSelectedMemory(null);
-      setSelectedPlace(place);
+      selectPlace(place);
     }
   };
 
   const handleMemoryClick = (id: string) => {
     const memory = memories.find((m) => m.id === id);
-    if (memory) setSelectedMemory(memory);
+    if (memory) selectMemory(memory);
   };
 
   const handleCameraClick = () => {
@@ -370,33 +360,11 @@ export default function MapPage() {
 
   const handleBack = () => {
     if (selectedMemory) {
-      setSelectedMemory(null);
+      selectMemory(null);
     } else {
-      setSelectedPlace(null);
+      selectPlace(null);
     }
   };
-
-  const MemoryTags = styled.div`
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  `;
-
-  const Tag = styled.span`
-    background: ${({ theme }) => theme.colors.gray[100]};
-    color: ${({ theme }) => theme.colors.gray[700]};
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  `;
-
-  const MemoryMetaInfo = styled.div`
-    display: flex;
-    gap: 8px;
-    color: ${({ theme }) => theme.colors.gray[500]};
-    font-size: 12px;
-    margin-top: 12px;
-  `;
 
   return (
     <MapPageContainer>
@@ -448,7 +416,7 @@ export default function MapPage() {
                 <Title>지도</Title>
                 <ViewModeSelect
                   value={viewMode}
-                  onChange={(e) => setViewMode(e.target.value)}
+                  onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
                 >
                   <option value="전체보기">전체보기</option>
                   <option value="관광명소">관광명소</option>

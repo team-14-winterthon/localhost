@@ -1,7 +1,9 @@
 import { Routes, Route } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@emotion/react";
 import { Toaster } from "react-hot-toast";
 import { theme } from "@/shared/styles/theme";
+import { queryClient } from "@/shared/lib/queryClient";
 import SplashPage from "@/pages/Splash";
 import AuthCallbackPage from "@/pages/AuthCallback";
 import ProfileSetupPage from "@/pages/ProfileSetup";
@@ -23,8 +25,9 @@ import "./App.css";
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Routes>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <Routes>
         <Route path="/" element={<SplashPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/profile-setup" element={<ProfileSetupPage />} />
@@ -47,8 +50,9 @@ function App() {
         <Route path="/movie/result" element={<MovieResultPage />} />
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
-      <Toaster position="top-center" />
-    </ThemeProvider>
+        <Toaster position="top-center" />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

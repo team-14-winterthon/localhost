@@ -64,7 +64,7 @@ export const moviesApi = {
 
 // Legacy export for backwards compatibility
 export const videoGenApi = {
-  async generate(request: { visitIds: string[]; userId: string }) {
+  async generate(_request: { visitIds: string[]; userId: string }) {
     // Map old format to new format (for gradual migration)
     return moviesApi.create({
       dong: '',
