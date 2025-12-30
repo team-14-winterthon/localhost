@@ -2,12 +2,13 @@ import styled from '@emotion/styled';
 import { useState } from 'react';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
 import { H2, P2 } from '@/shared/components/Typography';
 import { safeAreaPatterns } from '@/shared/styles/safeArea';
 import Navbar from '@/shared/components/Navbar';
+import { authPhotosApi } from '@/features/media/api';
 
 const Container = styled.div`
   position: relative;
@@ -204,8 +205,11 @@ interface CapturePageProps {
 
 export default function CapturePage({ showError = false }: CapturePageProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const spotId = searchParams.get('spotId') || '';
 
   const [photo, setPhoto] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadError, setUploadError] = useState(showError);
@@ -224,6 +228,12 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
 
       if (image.webPath) {
         setPhoto(image.webPath);
+
+        // Convert webPath to File for upload
+        const response = await fetch(image.webPath);
+        const blob = await response.blob();
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        setPhotoFile(file);
       }
     } catch (error) {
       console.error('Camera error:', error);
@@ -252,6 +262,7 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
         openCamera();
       } else if (result.index === 1) {
         setPhoto(null);
+        setPhotoFile(null);
       }
     } else {
       openCamera();
@@ -259,8 +270,13 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
   };
 
   const handleSubmit = async () => {
-    if (!photo) {
+    if (!photo || !photoFile) {
       toast.error('사진을 선택해주세요');
+      return;
+    }
+
+    if (!spotId) {
+      toast.error('장소 정보가 없습니다');
       return;
     }
 
@@ -268,20 +284,22 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
       setIsLoading(true);
       setUploadError(false);
 
-      // TODO: Implement photo upload API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // POST /auth-photos/upload
+      const result = await authPhotosApi.upload(photoFile, spotId, memo || undefined);
 
       // On success, navigate to success page
       navigate('/capture/success', {
         state: {
-          tags: ['맑음', '먹거리', '야간'],
-          location: '자갈치 시장',
-          date: '2025년 12월 30일'
+          photoId: result.id,
+          photoUrl: result.url,
+          description: result.description,
+          isVerified: result.isVerified,
         }
       });
     } catch (error) {
       console.error('Photo upload error:', error);
       setUploadError(true);
+      toast.error('업로드에 실패했습니다');
     } finally {
       setIsLoading(false);
     }

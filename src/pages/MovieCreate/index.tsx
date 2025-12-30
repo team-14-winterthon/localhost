@@ -4,8 +4,10 @@ import { H2, P1, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import DateRangePicker from "@/shared/components/DateRangePicker";
 import ClapperBoard from "@/shared/components/ClapperBoard";
+import { moviesApi } from "@/features/videoGen/api";
 
 type Value = Date | null | [Date | null, Date | null];
 
@@ -196,6 +198,7 @@ export default function MovieCreatePage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<Value>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formatDate = (date: Date | null) => {
     if (!date) return "00.00.00";
@@ -236,11 +239,46 @@ export default function MovieCreatePage() {
   const places = ["부산", "제주", "서울"];
   const moods = ["코미디", "브이로그", "다큐멘터리"];
 
-  const isFormValid = selectedPlace && selectedMood;
+  const isFormValid = selectedPlace && selectedMood && dateRange;
 
-  const handleSubmit = () => {
-    if (isFormValid) {
-      navigate("/movie/result");
+  const handleSubmit = async () => {
+    if (!isFormValid || isLoading) return;
+
+    try {
+      setIsLoading(true);
+
+      // 날짜 범위 추출
+      let startDate: string;
+      let endDate: string;
+
+      if (Array.isArray(dateRange)) {
+        startDate = dateRange[0]?.toISOString() || new Date().toISOString();
+        endDate = dateRange[1]?.toISOString() || new Date().toISOString();
+      } else {
+        startDate = dateRange?.toISOString() || new Date().toISOString();
+        endDate = startDate;
+      }
+
+      // POST /movies/create
+      const result = await moviesApi.create({
+        dong: selectedPlace,
+        mood: selectedMood,
+        startDate,
+        endDate,
+      });
+
+      toast.success("영화 생성이 시작되었습니다!");
+      navigate("/movie/result", {
+        state: {
+          movieId: result.id,
+          status: result.status,
+        },
+      });
+    } catch (error) {
+      console.error("영화 생성 실패:", error);
+      toast.error("영화 생성에 실패했습니다");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -317,8 +355,8 @@ export default function MovieCreatePage() {
       </Content>
 
       <FixedButtonContainer>
-        <SubmitButton disabled={!isFormValid} onClick={handleSubmit}>
-          <SubmitButtonText>다음으로</SubmitButtonText>
+        <SubmitButton disabled={!isFormValid || isLoading} onClick={handleSubmit}>
+          <SubmitButtonText>{isLoading ? "생성 중..." : "다음으로"}</SubmitButtonText>
         </SubmitButton>
       </FixedButtonContainer>
 

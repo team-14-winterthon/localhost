@@ -114,11 +114,8 @@ export default function SplashPage() {
     try {
       setIsLoading(true);
 
-      // Get Google OAuth URL from backend
-      const { url } = await authApi.getGoogleAuthUrl();
-
-      // Redirect to Google OAuth
-      window.location.href = url;
+      // Redirect to Google OAuth (POST /auth/google)
+      await authApi.redirectToGoogle();
     } catch (error) {
       console.error('Google login error:', error);
       toast.error('로그인에 실패했습니다');

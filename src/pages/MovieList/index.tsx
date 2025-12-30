@@ -3,7 +3,8 @@ import { theme } from "@/shared/styles/theme";
 import { H2, H4, P3, P4 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { moviesApi, type Movie } from "@/features/videoGen/api";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.gray[100]};
@@ -204,13 +205,25 @@ interface MovieListPageProps {
 export default function MovieListPage({ type = "my" }: MovieListPageProps) {
   const navigate = useNavigate();
   const [sortOrder] = useState("기본순");
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const popularMovies = [
-    { id: "1", subtitle: "농약 두봉지", title: "레전드 부산소마고의 영화" },
-    { id: "2", subtitle: "농약 두봉지", title: "부산의 추억" },
-    { id: "3", subtitle: "농약 두봉지", title: "해운대 이야기" },
-    { id: "4", subtitle: "농약 두봉지", title: "광안리 밤바다" },
-  ];
+  useEffect(() => {
+    const loadMovies = async () => {
+      try {
+        setLoading(true);
+        // GET /movies/my
+        const data = await moviesApi.getMyMovies();
+        setMovies(data);
+      } catch (error) {
+        console.error("영화 목록 로드 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovies();
+  }, []);
 
   const pageTitle = type === "my" ? "내가 만든 영화" : "인기 영화관";
 
@@ -234,32 +247,44 @@ export default function MovieListPage({ type = "my" }: MovieListPageProps) {
           </SortDropdown>
         </TitleBar>
 
-        <MovieGrid>
-          {popularMovies.map((movie) => (
-            <MovieCard key={movie.id}>
-              <FilmStrip>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <FilmHole key={`top-hole-${i}`} />
-                ))}
-              </FilmStrip>
-              <MovieImage>
-                <img
-                  src="/images/placeholder-movie.jpg"
-                  alt={movie.title}
-                />
-                <MovieInfo>
-                  <MovieSubtitle>{movie.subtitle}</MovieSubtitle>
-                  <MovieTitle>{movie.title}</MovieTitle>
-                </MovieInfo>
-              </MovieImage>
-              <FilmStrip>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <FilmHole key={`bottom-hole-${i}`} />
-                ))}
-              </FilmStrip>
-            </MovieCard>
-          ))}
-        </MovieGrid>
+        {loading ? (
+          <P3 style={{ textAlign: "center", padding: "40px 0" }}>로딩 중...</P3>
+        ) : movies.length === 0 ? (
+          <P3 style={{ textAlign: "center", padding: "40px 0" }}>
+            아직 만든 영화가 없습니다
+          </P3>
+        ) : (
+          <MovieGrid>
+            {movies.map((movie) => (
+              <MovieCard
+                key={movie.id}
+                onClick={() => navigate(`/movie/${movie.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <FilmStrip>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <FilmHole key={`top-hole-${i}`} />
+                  ))}
+                </FilmStrip>
+                <MovieImage>
+                  <img
+                    src={movie.thumbnailUrl || "/images/placeholder-movie.jpg"}
+                    alt={movie.title}
+                  />
+                  <MovieInfo>
+                    <MovieSubtitle>{movie.dong} · {movie.mood}</MovieSubtitle>
+                    <MovieTitle>{movie.title}</MovieTitle>
+                  </MovieInfo>
+                </MovieImage>
+                <FilmStrip>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <FilmHole key={`bottom-hole-${i}`} />
+                  ))}
+                </FilmStrip>
+              </MovieCard>
+            ))}
+          </MovieGrid>
+        )}
       </Content>
 
       <FloatingButton onClick={() => navigate("/movie/create")}>
