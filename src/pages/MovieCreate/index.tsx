@@ -4,6 +4,10 @@ import { H2, H3, H4, P1, P2, P4 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+
+type Value = Date | null | [Date | null, Date | null];
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.gray[100]};
@@ -39,7 +43,7 @@ const TitleSection = styled.div`
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 334px;
+  align-self: flex-start;
 `;
 
 const BackButton = styled.button`
@@ -302,12 +306,244 @@ const FixedButtonContainer = styled.div`
   max-width: 335px;
 `;
 
+const BottomSheet = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: white;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 10px 20px;
+  display: ${(props) => (props.isOpen ? "flex" : "none")};
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  max-height: 466px;
+`;
+
+const BottomSheetOverlay = styled.div<{ isOpen: boolean }>`
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: ${(props) => (props.isOpen ? "block" : "none")};
+  z-index: 999;
+`;
+
+const DragHandle = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
+
+const DragBar = styled.div`
+  width: 81px;
+  height: 3px;
+  background-color: ${theme.colors.gray[400]};
+  border-radius: 2.5px;
+`;
+
+const SheetTitle = styled(H3)`
+  color: ${theme.colors.gray[900]};
+  text-align: center;
+`;
+
+const StyledCalendarWrapper = styled.div`
+  width: 100%;
+
+  .react-calendar {
+    width: 100%;
+    border: none;
+    font-family: "Pretendard", sans-serif;
+    background: white;
+  }
+
+  .react-calendar__navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    height: auto;
+  }
+
+  .react-calendar__navigation__label {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: ${theme.colors.gray[900]};
+    flex-grow: 0 !important;
+    pointer-events: none;
+  }
+
+  .react-calendar__navigation__arrow {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0;
+    padding: 0;
+    min-width: 24px;
+    flex-grow: 0 !important;
+  }
+
+  .react-calendar__navigation__prev-button {
+    order: -1;
+  }
+
+  .react-calendar__navigation__next-button {
+    order: 1;
+  }
+
+  .react-calendar__month-view__weekdays {
+    font-family: "Pretendard", sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: ${theme.colors.gray[500]};
+    margin-bottom: 6px;
+  }
+
+  .react-calendar__month-view__weekdays__weekday {
+    padding: 10px 0;
+    text-align: center;
+    abbr {
+      text-decoration: none;
+    }
+  }
+
+  .react-calendar__month-view__days {
+    gap: 0;
+  }
+
+  .react-calendar__tile {
+    width: 38px;
+    height: 48px;
+    background: transparent;
+    border: none;
+    font-family: "Pretendard", sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: ${theme.colors.base.black};
+    cursor: pointer;
+    padding: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: ${theme.colors.gray[200]};
+      border-radius: 4px;
+    }
+
+    &:disabled {
+      color: ${theme.colors.gray[400]};
+      cursor: not-allowed;
+    }
+  }
+
+  .react-calendar__tile--now {
+    background: transparent;
+  }
+
+  /* 시작 날짜 */
+  .react-calendar__tile--rangeStart {
+    background-color: ${theme.colors.primary[500]} !important;
+    color: white !important;
+    border-radius: 4px 0 0 4px !important;
+
+    &:hover {
+      background-color: ${theme.colors.primary[700]} !important;
+    }
+  }
+
+  /* 끝 날짜 */
+  .react-calendar__tile--rangeEnd {
+    background-color: ${theme.colors.primary[500]} !important;
+    color: white !important;
+    border-radius: 0 4px 4px 0 !important;
+
+    &:hover {
+      background-color: ${theme.colors.primary[700]} !important;
+    }
+  }
+
+  /* 중간 날짜만 (시작/끝 제외) - 투명도 적용 */
+  .react-calendar__tile--range:not(.react-calendar__tile--rangeStart):not(.react-calendar__tile--rangeEnd) {
+    background-color: rgba(254, 91, 50, 0.15) !important;
+    color: ${theme.colors.base.black} !important;
+    border-radius: 0 !important;
+
+    &:hover {
+      background-color: rgba(254, 91, 50, 0.25) !important;
+    }
+  }
+
+  /* 시작과 끝이 같은 날짜인 경우 */
+  .react-calendar__tile--rangeStart.react-calendar__tile--rangeEnd {
+    border-radius: 4px !important;
+  }
+
+  /* 선택된 단일 날짜 */
+  .react-calendar__tile--active {
+    background-color: ${theme.colors.primary[500]} !important;
+    color: white !important;
+    border-radius: 4px !important;
+
+    &:hover {
+      background-color: ${theme.colors.primary[700]} !important;
+    }
+  }
+
+  .react-calendar__month-view__days__day--neighboringMonth {
+    color: ${theme.colors.gray[400]};
+  }
+`;
+
 export default function MovieCreatePage() {
   const navigate = useNavigate();
   const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [startDate] = useState("00.00.00");
-  const [endDate] = useState("00.00.00");
+  const [dateRange, setDateRange] = useState<Value>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "00.00.00";
+    const year = String(date.getFullYear()).slice(2);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}.${month}.${day}`;
+  };
+
+  const getDateRangeText = () => {
+    if (!dateRange) return { start: "00.00.00", end: "00.00.00" };
+
+    if (Array.isArray(dateRange)) {
+      const [start, end] = dateRange;
+      return {
+        start: formatDate(start),
+        end: formatDate(end),
+      };
+    }
+
+    return {
+      start: formatDate(dateRange),
+      end: formatDate(dateRange),
+    };
+  };
+
+  const { start: startDate, end: endDate } = getDateRangeText();
+
+  const handleDateChange = (value: Value) => {
+    setDateRange(value);
+
+    // 날짜 범위가 완전히 선택되면 바텀시트 닫기
+    if (Array.isArray(value) && value[0] && value[1]) {
+      setTimeout(() => setIsCalendarOpen(false), 300);
+    }
+  };
 
   const places = ["부산", "제주", "서울"];
   const moods = ["코미디", "브이로그", "다큐멘터리"];
@@ -427,7 +663,7 @@ export default function MovieCreatePage() {
 
           <FormField>
             <FormLabel>날짜 지정*</FormLabel>
-            <DateInput>
+            <DateInput onClick={() => setIsCalendarOpen(true)}>
               <DateText>
                 <span>{startDate}</span>
                 <span>~</span>
@@ -446,6 +682,44 @@ export default function MovieCreatePage() {
       </FixedButtonContainer>
 
       <Navbar />
+
+      {/* 캘린더 바텀시트 */}
+      <BottomSheetOverlay
+        isOpen={isCalendarOpen}
+        onClick={() => setIsCalendarOpen(false)}
+      />
+      <BottomSheet isOpen={isCalendarOpen}>
+        <DragHandle>
+          <DragBar />
+        </DragHandle>
+        <SheetTitle>날짜 지정</SheetTitle>
+        <StyledCalendarWrapper>
+            <Calendar
+              onChange={handleDateChange}
+              value={dateRange}
+              selectRange={true}
+              locale="ko-KR"
+              formatDay={(_locale, date) => String(date.getDate())}
+              formatMonthYear={(_locale, date) =>
+                `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+                  2,
+                  "0"
+                )}`
+              }
+              prevLabel={<img src="/images/expand_left.svg" alt="이전 달" />}
+              nextLabel={
+                <img
+                  src="/images/expand_left.svg"
+                  alt="다음 달"
+                  style={{ transform: "rotate(180deg)" }}
+                />
+              }
+              prev2Label={null}
+              next2Label={null}
+              showNeighboringMonth={true}
+            />
+          </StyledCalendarWrapper>
+      </BottomSheet>
     </PageContainer>
   );
 }
