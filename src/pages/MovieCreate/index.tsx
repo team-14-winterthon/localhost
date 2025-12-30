@@ -1,10 +1,11 @@
 import styled from "@emotion/styled";
 import { theme } from "@/shared/styles/theme";
-import { H2, H3, H4, P1, P2, P4 } from "@/shared/components/Typography";
+import { H2, P1, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DateRangePicker from "@/shared/components/DateRangePicker";
+import ClapperBoard from "@/shared/components/ClapperBoard";
 
 type Value = Date | null | [Date | null, Date | null];
 
@@ -68,125 +69,6 @@ const BackButton = styled.button`
 
 const PageTitle = styled(H2)`
   color: ${theme.colors.gray[900]};
-`;
-
-const ClapperBoard = styled.div`
-  width: 263px;
-  display: flex;
-  flex-direction: column;
-`;
-
-const ClapperTop = styled.div`
-  background-color: ${theme.colors.gray[800]};
-  height: 23px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-`;
-
-const ClapperStripe = styled.div`
-  width: 40px;
-  height: 100%;
-  background: repeating-linear-gradient(
-    -45deg,
-    #000,
-    #000 5px,
-    #fff 5px,
-    #fff 10px
-  );
-`;
-
-const ClapperDivider = styled.div`
-  height: 2px;
-  background-color: #fff;
-  width: 100%;
-`;
-
-const ClapperBody = styled.div`
-  background-color: ${theme.colors.gray[800]};
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  color: white;
-`;
-
-const ProdNumber = styled.div`
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 4px;
-`;
-
-const ProdLabel = styled(H4)`
-  color: white;
-`;
-
-const ProdValue = styled(H4)`
-  color: white;
-`;
-
-const InfoGrid = styled.div`
-  display: flex;
-  border-top: 1px solid white;
-  border-bottom: 1px solid white;
-`;
-
-const InfoCell = styled.div<{ borderRight?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px 10px;
-  flex: 1;
-  border-right: ${(props) => (props.borderRight ? "1px solid white" : "none")};
-`;
-
-const InfoLabel = styled(P4)`
-  color: white;
-`;
-
-const InfoValue = styled(H3)`
-  color: white;
-`;
-
-const BottomInfo = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const LeftInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid white;
-  width: 133px;
-`;
-
-const InfoRow = styled.div<{ borderTop?: boolean }>`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 4px 0;
-  border-top: ${(props) => (props.borderTop ? "1px solid white" : "none")};
-`;
-
-const InfoRowLabel = styled(P4)`
-  color: white;
-`;
-
-const InfoRowValue = styled(H4)`
-  color: white;
-`;
-
-const RightInfo = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 0 10px;
 `;
 
 const FormSection = styled.div`
@@ -374,58 +256,14 @@ export default function MovieCreatePage() {
           <PageTitle>영화 만들기</PageTitle>
         </TitleSection>
 
-        <ClapperBoard>
-          <ClapperTop>
-            <ClapperStripe />
-            <ClapperStripe />
-            <ClapperStripe />
-            <ClapperStripe />
-          </ClapperTop>
-          <ClapperDivider />
-          <ClapperTop>
-            <ClapperStripe />
-            <ClapperStripe />
-            <ClapperStripe />
-            <ClapperStripe />
-          </ClapperTop>
-          <ClapperDivider />
-          <ClapperBody>
-            <ProdNumber>
-              <ProdLabel>PROD. NO.</ProdLabel>
-              <ProdValue>1234512</ProdValue>
-            </ProdNumber>
-            <InfoGrid>
-              <InfoCell borderRight>
-                <InfoLabel>SCENE</InfoLabel>
-                <InfoValue>001</InfoValue>
-              </InfoCell>
-              <InfoCell borderRight>
-                <InfoLabel>PLACE</InfoLabel>
-                <InfoValue>{selectedPlace || "미선택"}</InfoValue>
-              </InfoCell>
-              <InfoCell>
-                <InfoLabel>ROLL</InfoLabel>
-                <InfoValue>미선택</InfoValue>
-              </InfoCell>
-            </InfoGrid>
-            <BottomInfo>
-              <LeftInfo>
-                <InfoRow>
-                  <InfoRowLabel>DATE</InfoRowLabel>
-                  <InfoRowValue>2025.12.30</InfoRowValue>
-                </InfoRow>
-                <InfoRow borderTop>
-                  <InfoRowLabel>DIRECTOR</InfoRowLabel>
-                  <InfoRowValue>농약두봉지</InfoRowValue>
-                </InfoRow>
-              </LeftInfo>
-              <RightInfo>
-                <InfoLabel>MOOD</InfoLabel>
-                <H4 style={{ color: "white" }}>{selectedMood || "미선택"}</H4>
-              </RightInfo>
-            </BottomInfo>
-          </ClapperBody>
-        </ClapperBoard>
+        <ClapperBoard
+          scene="001"
+          place={selectedPlace}
+          roll={null}
+          director="농약두봉지"
+          mood={selectedMood}
+          date="2025.12.30"
+        />
 
         <FormSection>
           <FormField>
