@@ -43,8 +43,8 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        // Exchange code for access token
-        const { access_token } = await authApi.handleGoogleCallback(code);
+        // Exchange code for access token (POST /auth/login)
+        const { access_token } = await authApi.login(code);
 
         // Save token to localStorage
         localStorage.setItem('authToken', access_token);
