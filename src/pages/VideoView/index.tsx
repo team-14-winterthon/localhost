@@ -194,6 +194,20 @@ export default function VideoViewPage() {
     }
   };
 
+  const handleDownload = () => {
+    if (!movie?.videoUrl) return;
+
+    // a 태그를 사용한 다운로드 (CORS 문제 우회)
+    const a = document.createElement("a");
+    a.href = movie.videoUrl;
+    a.download = `${movie.title || "video"}.mp4`;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   if (loading) {
     return (
       <PageContainer>
@@ -265,7 +279,7 @@ export default function VideoViewPage() {
               <ActionIcon src="/images/comment.svg" alt="댓글" />
               <ActionCount>999</ActionCount>
             </ActionButton>
-            <ActionButton>
+            <ActionButton onClick={handleDownload}>
               <ActionIcon src="/images/download.svg" alt="다운로드" />
             </ActionButton>
           </RightActions>

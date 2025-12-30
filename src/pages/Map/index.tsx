@@ -449,7 +449,7 @@ export default function MapPage() {
                 <SpotSubtitle>관광명소</SpotSubtitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src="/images/placeholder-spot.png"
+                    src={selectedPlace.imageUrl || "/images/placeholder-spot.png"}
                     alt={selectedPlace.name}
                   />
                 </DetailImageWrapper>

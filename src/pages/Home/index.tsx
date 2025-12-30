@@ -168,10 +168,14 @@ export default function HomePage() {
       </Header>
 
       <Main>
-        <Section>
-          <SectionTitle>이달의 하이라이트</SectionTitle>
-          <HighlightFilmCard imageSrc="/images/highlight.jpg" />
-        </Section>
+        {movies.length > 0 && (
+          <Section>
+            <SectionTitle>이달의 하이라이트</SectionTitle>
+            <HighlightFilmCard
+              imageSrc={movies[0].thumbnailUrl || "/images/highlight.jpg"}
+            />
+          </Section>
+        )}
 
         <MemoryCard onClick={() => navigate("/capture")}>
           <MemoryContent>
