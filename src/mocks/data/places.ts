@@ -5,6 +5,7 @@ const IMAGES = {
   jagalchi: 'https://images.unsplash.com/photo-1580822184713-fc5400e7fe10?w=800&h=600&fit=crop',
   haeundae: 'https://images.unsplash.com/photo-1598981457915-aea220950616?w=800&h=600&fit=crop',
   dadaepo: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=800&h=600&fit=crop',
+  bssm: 'https://velog.velcdn.com/images/lovingcats/post/6d6e63c4-f82e-41e4-809d-3d7ee5d0bf65/image.png?w=800&h=600',
 }
 
 export const mockPlaces: Place[] = [
@@ -25,6 +26,12 @@ export const mockPlaces: Place[] = [
     name: '다대포해수욕장',
     latitude: 35.0469,
     longitude: 128.9664,
+  },
+  {
+    id: 'place-4',
+    name: '부산소프트웨어마이스터고등학교',
+    latitude: 35.1887725,
+    longitude: 128.9034629,
   },
 ]
 
@@ -47,6 +54,12 @@ export const mockMemories: Memory[] = [
     description: '다대포해수욕장의 멋진 낙조분수쇼! 음악과 함께하는 분수가 환상적이었어요.',
     url: IMAGES.dadaepo,
   },
+  {
+    id: 'memory-4',
+    title: '부산소프트웨어마이스터고등학교',
+    description: '부산소프트웨어마이스터고등학교 6기 탄생을 환영합니다...',
+    url: IMAGES.bssm,
+  },
 ]
 
 // 지역별로 필터링하는 헬퍼 함수
@@ -54,7 +67,7 @@ export function getPlacesByDong(dong?: string): Place[] {
   if (!dong) return mockPlaces
 
   const dongMapping: Record<string, string[]> = {
-    부산: ['place-1', 'place-2', 'place-3'],
+    부산: ['place-1', 'place-2', 'place-3', 'place-4'],
   }
 
   const placeIds = dongMapping[dong]
