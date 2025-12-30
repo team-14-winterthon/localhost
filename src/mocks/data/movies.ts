@@ -17,7 +17,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '브이로그',
-    createdAt: '2024-12-20T10:30:00.000Z',
+    createdAt: '2025-12-20T10:30:00.000Z',
     status: true,
   },
   {
@@ -27,7 +27,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '다큐멘터리',
-    createdAt: '2024-12-18T14:20:00.000Z',
+    createdAt: '2025-12-18T14:20:00.000Z',
     status: true,
   },
   {
@@ -37,7 +37,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '코미디',
-    createdAt: '2024-12-15T09:00:00.000Z',
+    createdAt: '2025-12-15T09:00:00.000Z',
     status: true,
   },
   {
@@ -47,7 +47,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '브이로그',
-    createdAt: '2024-12-12T16:45:00.000Z',
+    createdAt: '2025-12-12T16:45:00.000Z',
     status: true,
   },
   {
@@ -57,7 +57,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '코미디',
-    createdAt: '2024-12-10T11:00:00.000Z',
+    createdAt: '2025-12-10T11:00:00.000Z',
     status: true,
   },
   {
@@ -67,7 +67,7 @@ export const mockMovies: Movie[] = [
     videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '다큐멘터리',
-    createdAt: '2024-12-08T08:30:00.000Z',
+    createdAt: '2025-12-08T08:30:00.000Z',
     status: true,
   },
 ]
