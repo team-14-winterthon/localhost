@@ -12,6 +12,9 @@ import CapturePage from '@/pages/Capture'
 import CaptureSuccessPage from '@/pages/CaptureSuccess'
 import VideoCreatePage from '@/pages/VideoCreate'
 import VideoResultPage from '@/pages/VideoResult'
+import MoviePage from '@/pages/Movie'
+import MovieListPage from '@/pages/MovieList'
+import MovieCreatePage from '@/pages/MovieCreate'
 import './App.css'
 
 function App() {
@@ -28,6 +31,10 @@ function App() {
         <Route path="/capture/success" element={<CaptureSuccessPage />} />
         <Route path="/video/create" element={<VideoCreatePage />} />
         <Route path="/video/result/:id" element={<VideoResultPage />} />
+        <Route path="/video" element={<MoviePage />} />
+        <Route path="/video/my" element={<MovieListPage type="my" />} />
+        <Route path="/video/popular" element={<MovieListPage type="popular" />} />
+        <Route path="/movie/create" element={<MovieCreatePage />} />
       </Routes>
       <Toaster position="top-center" />
     </ThemeProvider>
