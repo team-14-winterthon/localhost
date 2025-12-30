@@ -41,14 +41,41 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* iOS safe area support */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+html {
+  height: -webkit-fill-available;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  width: 100%;
 }
 
 * {
   box-sizing: border-box;
+  /* Disable tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent text selection on mobile */
+  -webkit-touch-callout: none;
+}
+
+/* Improve touch scrolling on iOS */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent double-tap zoom */
+button, a, input, select, textarea {
+  touch-action: manipulation;
 }
 
 h1, h2, h3, h4, h5, h6, p {
@@ -67,10 +94,20 @@ button {
   color: var(--color-gray-100);
   cursor: pointer;
   transition: background-color 0.25s;
+  /* Mobile optimizations */
+  -webkit-user-select: none;
+  user-select: none;
+  min-height: 44px; /* iOS minimum touch target */
 }
 
-button:hover {
+button:active {
   background-color: var(--color-primary-700);
+}
+
+@media (hover: hover) {
+  button:hover {
+    background-color: var(--color-primary-700);
+  }
 }
 
 button:focus,
@@ -83,4 +120,16 @@ button:disabled {
   background-color: var(--color-gray-400);
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* Input styles for mobile */
+input, textarea, select {
+  font-size: 16px; /* Prevent iOS zoom on focus */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
 }
