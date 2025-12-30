@@ -15,19 +15,19 @@ const Container = styled.div`
   left: 0;
   right: 0;
   z-index: 10;
-  background: ${({ theme }) => theme.colors.background.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.xl} ${({ theme }) => theme.borderRadius.xl} 0 0;
-  box-shadow: ${({ theme }) => theme.shadows.lg};
+  background: white;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   touch-action: none;
 `
 
 const DragHandle = styled.div`
-  width: 48px;
-  height: 4px;
-  background: ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  margin: ${({ theme }) => theme.spacing.md} auto ${({ theme }) => theme.spacing.sm};
+  width: 81px;
+  height: 3px;
+  background: #D1D9E8;
+  border-radius: 2.5px;
+  margin: 10px auto;
   cursor: grab;
 
   &:active {

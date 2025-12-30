@@ -6,6 +6,7 @@ export interface MapMarker {
   }
   type: 'current' | 'spot'
   title?: string
+  showLabel?: boolean
   onClick?: () => void
 }
 
@@ -22,4 +23,5 @@ export interface LeafletMapProps {
   zoom?: number
   onMapClick?: (lat: number, lng: number) => void
   onMarkerClick?: (markerId: string) => void
+  centerOffset?: number // 중심 오프셋 (픽셀 단위, 양수면 아래로, 음수면 위로)
 }

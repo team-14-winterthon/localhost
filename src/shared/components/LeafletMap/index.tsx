@@ -20,23 +20,39 @@ const currentLocationIcon = L.divIcon({
   iconAnchor: [12, 12],
 })
 
-// Spot 마커 아이콘 (커스텀 SVG - Figma 디자인)
-const spotIcon = L.divIcon({
-  className: 'spot-marker',
-  html: `<div style="
-    width: 37px;
-    height: 49px;
-    position: relative;
-  ">
-    <svg width="37" height="49" viewBox="0 0 37 49" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18.5 0C8.28 0 0 8.28 0 18.5C0 32.375 18.5 49 18.5 49C18.5 49 37 32.375 37 18.5C37 8.28 28.72 0 18.5 0Z" fill="#FF5B29"/>
-      <path d="M18.5 10L20.5 16L26.5 18L20.5 20L18.5 26L16.5 20L10.5 18L16.5 16L18.5 10Z" fill="white"/>
-    </svg>
-  </div>`,
-  iconSize: [37, 49],
-  iconAnchor: [18.5, 49],
-  popupAnchor: [0, -49],
-})
+// Spot 마커 아이콘 생성 함수
+const createSpotIcon = (label?: string) => {
+  if (label) {
+    return L.divIcon({
+      className: 'spot-marker-with-label',
+      html: `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <img src="/images/marker.svg" style="width: 37px; height: 49px; display: block;" />
+          <div style="
+            font-family: 'Pretendard', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #07080A;
+            text-align: center;
+            white-space: nowrap;
+            text-shadow: 0 0 4px white, 0 0 4px white, 0 0 4px white;
+          ">${label}</div>
+        </div>
+      `,
+      iconSize: [92, 72],
+      iconAnchor: [46, 49],
+      popupAnchor: [0, -49],
+    })
+  }
+
+  return L.divIcon({
+    className: 'spot-marker',
+    html: `<img src="/images/marker.svg" style="width: 37px; height: 49px; display: block;" />`,
+    iconSize: [37, 49],
+    iconAnchor: [18.5, 49],
+    popupAnchor: [0, -49],
+  })
+}
 
 const MapWrapper = styled.div`
   width: 100%;
@@ -50,19 +66,39 @@ const MapWrapper = styled.div`
   }
 
   .current-location-marker,
-  .spot-marker {
+  .spot-marker,
+  .spot-marker-with-label {
     background: transparent;
     border: none;
   }
 `
 
 // 지도 중심 업데이트 컴포넌트
-function MapCenterUpdater({ center }: { center: { lat: number; lng: number } }) {
+function MapCenterUpdater({
+  center,
+  zoom,
+  offset = 0
+}: {
+  center: { lat: number; lng: number }
+  zoom: number
+  offset?: number
+}) {
   const map = useMap()
 
   useEffect(() => {
-    map.setView([center.lat, center.lng])
-  }, [map, center.lat, center.lng])
+    if (offset !== 0) {
+      // 먼저 center와 zoom을 설정
+      map.setView([center.lat, center.lng], zoom, { animate: false })
+
+      // 그 다음 offset을 적용한 위치로 이동
+      const targetPoint = map.project([center.lat, center.lng], zoom)
+      targetPoint.y += offset
+      const targetLatLng = map.unproject(targetPoint, zoom)
+      map.panTo(targetLatLng, { animate: true, duration: 0.5 })
+    } else {
+      map.setView([center.lat, center.lng], zoom, { animate: true })
+    }
+  }, [map, center.lat, center.lng, zoom, offset])
 
   return null
 }
@@ -88,7 +124,9 @@ function MapMarkerComponent({
   marker: MapMarker
   onMarkerClick?: (markerId: string) => void
 }) {
-  const icon = marker.type === 'current' ? currentLocationIcon : spotIcon
+  const icon = marker.type === 'current'
+    ? currentLocationIcon
+    : createSpotIcon(marker.showLabel ? marker.title : undefined)
 
   const handleClick = () => {
     if (marker.onClick) {
@@ -107,7 +145,7 @@ function MapMarkerComponent({
         click: handleClick,
       }}
     >
-      {marker.title && <Popup>{marker.title}</Popup>}
+      {marker.title && !marker.showLabel && <Popup>{marker.title}</Popup>}
     </Marker>
   )
 }
@@ -118,6 +156,7 @@ export default function LeafletMap({
   zoom = 15,
   onMapClick,
   onMarkerClick,
+  centerOffset = 0,
 }: LeafletMapProps) {
   return (
     <MapWrapper>
@@ -133,7 +172,7 @@ export default function LeafletMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
 
-        <MapCenterUpdater center={center} />
+        <MapCenterUpdater center={center} zoom={zoom} offset={centerOffset} />
         <MapClickHandler onMapClick={onMapClick} />
 
         {markers.map((marker) => (
