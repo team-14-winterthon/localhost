@@ -242,7 +242,7 @@ export default function MovieListPage({ type = "my" }: MovieListPageProps) {
             {movies.map((movie) => (
               <MovieCard
                 key={movie.id}
-                onClick={() => navigate(`/movie/${movie.id}`)}
+                onClick={() => navigate(`/video/view/${movie.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <FilmStrip>
