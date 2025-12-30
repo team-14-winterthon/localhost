@@ -14,24 +14,28 @@ export const mockPlaces: Place[] = [
     name: '자갈치시장',
     latitude: 35.0967,
     longitude: 129.0303,
+    image_url: IMAGES.jagalchi,
   },
   {
     id: 'place-2',
     name: '해운대해수욕장',
     latitude: 35.1586,
     longitude: 129.1603,
+    image_url: IMAGES.haeundae,
   },
   {
     id: 'place-3',
     name: '다대포해수욕장',
     latitude: 35.0469,
     longitude: 128.9664,
+    image_url: IMAGES.dadaepo,
   },
   {
     id: 'place-4',
     name: '부산소프트웨어마이스터고등학교',
     latitude: 35.1887725,
     longitude: 128.9034629,
+    image_url: IMAGES.bssm,
   },
 ]
 
