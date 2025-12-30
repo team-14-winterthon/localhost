@@ -416,7 +416,9 @@ export default function MapPage() {
                 <Title>지도</Title>
                 <ViewModeSelect
                   value={viewMode}
-                  onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+                  onChange={(e) =>
+                    setViewMode(e.target.value as typeof viewMode)
+                  }
                 >
                   <option value="전체보기">전체보기</option>
                   <option value="관광명소">관광명소</option>
@@ -434,7 +436,10 @@ export default function MapPage() {
                 </SectionTitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src={selectedMemory.url || "/images/placeholder-spot.png"}
+                    src={
+                      selectedMemory.url ||
+                      "https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=300&fit=crop"
+                    }
                     alt="메모리"
                   />
                 </DetailImageWrapper>
@@ -449,7 +454,7 @@ export default function MapPage() {
                 <SpotSubtitle>관광명소</SpotSubtitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src={selectedPlace.imageUrl || "/images/placeholder-spot.png"}
+                    src="https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=300&fit=crop"
                     alt={selectedPlace.name}
                   />
                 </DetailImageWrapper>
