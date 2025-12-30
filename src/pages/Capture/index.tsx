@@ -16,6 +16,7 @@ const Container = styled.div`
   background-color: ${theme.colors.gray[100]};
   display: flex;
   flex-direction: column;
+  gap: 24px;
   ${safeAreaPatterns.fullScreen}
 `;
 
@@ -29,26 +30,24 @@ const StatusBar = styled.div`
   z-index: 100;
 `;
 
-const Logo = styled.div`
-  width: 76px;
-  height: 28px;
-  margin-top: 20px;
-  margin-left: 20px;
-  align-self: flex-start;
-  flex-shrink: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+const LogoHeader = styled.header`
+  padding: 56px 20px 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 `;
 
-const Header = styled.header`
+const Logo = styled.img`
+  height: 28px;
+  width: 76px;
+  display: block;
+`;
+
+const TitleHeader = styled.header`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px 20px 0;
+  padding: 0 20px;
   width: 100%;
 `;
 
@@ -132,7 +131,7 @@ const Label = styled(P2)`
 const Textarea = styled.textarea`
   width: 100%;
   padding: 16px;
-  border: 1px solid ${theme.colors.primary[300]};
+  border: 1px solid ${theme.colors.gray[400]};
   border-radius: 12px;
   font-family: ${theme.typography.p2.fontFamily};
   font-size: ${theme.typography.p2.fontSize};
@@ -291,16 +290,16 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
   return (
     <Container>
       <StatusBar />
-      <Logo>
-        <img src="/images/logo.png" alt="LocalHost" />
-      </Logo>
+      <LogoHeader>
+        <Logo src="/images/logo.png" alt="LocalHost" />
+      </LogoHeader>
 
-      <Header>
+      <TitleHeader>
         <BackButton onClick={handleBack}>
           <img src="/images/arrow-left.svg" alt="뒤로가기" />
         </BackButton>
         <Title>사진 인증</Title>
-      </Header>
+      </TitleHeader>
 
       <FormContainer>
         <PhotoUploadArea onClick={handlePhotoClick}>

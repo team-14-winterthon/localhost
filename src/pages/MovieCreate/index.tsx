@@ -14,6 +14,9 @@ const PageContainer = styled.div`
   min-height: 100vh;
   position: relative;
   padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 `;
 
 const Header = styled.header`
