@@ -6,8 +6,10 @@ import LeafletMap from "@/shared/components/LeafletMap";
 import BottomSheet from "@/shared/components/BottomSheet";
 import SpotCard from "@/features/spots/components/SpotCard";
 import { useGeolocation } from "@/shared/hooks/useGeolocation";
-import { spotsApi } from "@/features/spots/api";
-import type { Spot, Memory } from "@/features/spots/types";
+import { placesApi } from "@/features/spots/api";
+import { authPhotosApi } from "@/features/media/api";
+import type { Place } from "@/features/spots/types";
+import type { AuthPhoto } from "@/features/media/api";
 import type { MapMarker } from "@/shared/components/LeafletMap/types";
 import { calculateDistance } from "@/shared/utils/distance";
 import { H3, P3 } from "@/shared/components/Typography";
@@ -255,66 +257,37 @@ const MemoryOverlay = styled.p`
 export default function MapPage() {
   const navigate = useNavigate();
   const { position, loading: geoLoading } = useGeolocation();
-  const [spots, setSpots] = useState<Spot[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [memories, setMemories] = useState<AuthPhoto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
-  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [selectedMemory, setSelectedMemory] = useState<AuthPhoto | null>(null);
   const [viewMode, setViewMode] = useState<string>("전체보기");
-
-  // Mock Memories Data
-  const memories: Memory[] = [
-    {
-      id: "1",
-      visit_id: "v1",
-      title: "이게 부산이지 ㅋㅋ",
-      description: "이 바닥을 뜨는 방법",
-      image_url: "https://placekitten.com/200/301",
-      tags: ["맑음", "먹거리", "야간"],
-      date: "2025년 12월 30",
-      location: "자갈치 시장",
-    },
-    {
-      id: "2",
-      visit_id: "v2",
-      title: "고미 귀여워",
-      description: "고양이가 최고야",
-      image_url: "https://placekitten.com/200/302",
-      tags: ["구름", "힐링"],
-      date: "2025년 12월 29일",
-      location: "흰여울 문화마을",
-    },
-    {
-      id: "3",
-      visit_id: "v3",
-      title: "바다 뷰 레전드",
-      description: "뷰가 미쳤어요",
-      image_url: "https://placekitten.com/200/303",
-      tags: ["바다", "풍경"],
-      date: "2025년 12월 28일",
-      location: "태종대",
-    },
-  ];
 
   // 현재 위치 기준 중심 좌표
   const center = position
     ? { lat: position.coords.latitude, lng: position.coords.longitude }
     : { lat: 37.5665, lng: 126.978 }; // 서울 기본
 
-  // Spots 데이터 로드
+  // Places 및 Memories 데이터 로드
   useEffect(() => {
-    const loadSpots = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await spotsApi.getAll();
-        setSpots(data);
+        const [placesData, memoriesData] = await Promise.all([
+          placesApi.getAll(),
+          authPhotosApi.getMyMemories(),
+        ]);
+        setPlaces(placesData);
+        setMemories(memoriesData);
       } catch (error) {
-        console.error("Spots 로드 실패:", error);
+        console.error("데이터 로드 실패:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadSpots();
+    loadData();
   }, []);
 
   // 마커 생성
@@ -333,30 +306,33 @@ export default function MapPage() {
           },
         ]
       : []),
-    // Spot 마커들
-    ...spots.map((spot) => ({
-      id: spot.id,
-      position: { lat: spot.lat, lng: spot.lng },
+    // Place 마커들
+    ...places.map((place) => ({
+      id: place.id,
+      position: { lat: place.latitude, lng: place.longitude },
       type: "spot" as const,
-      title: spot.name,
-      showLabel: selectedSpot?.id === spot.id, // 선택된 spot만 라벨 표시
+      title: place.name,
+      showLabel: selectedPlace?.id === place.id, // 선택된 place만 라벨 표시
       onClick: () => {
         setSelectedMemory(null);
-        setSelectedSpot(spot);
+        setSelectedPlace(place);
       },
     })),
   ];
 
-  // 거리 계산된 spots (정렬)
-  const spotsWithDistance = spots
-    .map((spot) => ({
-      ...spot,
+  // 거리 계산된 places (정렬)
+  const placesWithDistance = places
+    .map((place) => ({
+      ...place,
+      // SpotCard에서 사용하는 필드들 추가
+      lat: place.latitude,
+      lng: place.longitude,
       distance: position
         ? calculateDistance(
             position.coords.latitude,
             position.coords.longitude,
-            spot.lat,
-            spot.lng
+            place.latitude,
+            place.longitude
           )
         : undefined,
     }))
@@ -364,18 +340,18 @@ export default function MapPage() {
 
   const handleMarkerClick = (markerId: string) => {
     if (markerId === "current-location") return;
-    const spot = spots.find((s) => s.id === markerId);
-    if (spot) {
+    const place = places.find((p) => p.id === markerId);
+    if (place) {
       setSelectedMemory(null);
-      setSelectedSpot(spot);
+      setSelectedPlace(place);
     }
   };
 
-  const handleSpotCardClick = (spotId: string) => {
-    const spot = spots.find((s) => s.id === spotId);
-    if (spot) {
+  const handlePlaceCardClick = (placeId: string) => {
+    const place = places.find((p) => p.id === placeId);
+    if (place) {
       setSelectedMemory(null);
-      setSelectedSpot(spot);
+      setSelectedPlace(place);
     }
   };
 
@@ -385,14 +361,18 @@ export default function MapPage() {
   };
 
   const handleCameraClick = () => {
-    navigate("/capture");
+    if (selectedPlace) {
+      navigate(`/capture?spotId=${selectedPlace.id}`);
+    } else {
+      navigate("/capture");
+    }
   };
 
   const handleBack = () => {
     if (selectedMemory) {
       setSelectedMemory(null);
     } else {
-      setSelectedSpot(null);
+      setSelectedPlace(null);
     }
   };
 
@@ -422,14 +402,14 @@ export default function MapPage() {
     <MapPageContainer>
       <LeafletMap
         center={
-          selectedSpot
-            ? { lat: selectedSpot.lat, lng: selectedSpot.lng }
+          selectedPlace
+            ? { lat: selectedPlace.latitude, lng: selectedPlace.longitude }
             : center
         }
-        zoom={selectedSpot ? 16 : 15}
+        zoom={selectedPlace ? 16 : 15}
         markers={markers}
         onMarkerClick={handleMarkerClick}
-        centerOffset={selectedSpot ? 200 : 0}
+        centerOffset={selectedPlace ? 200 : 0}
       />
 
       <CameraButton onClick={handleCameraClick}>
@@ -442,7 +422,7 @@ export default function MapPage() {
         initialHeight={
           selectedMemory
             ? window.innerHeight * 0.85
-            : selectedSpot
+            : selectedPlace
             ? window.innerHeight * 0.6
             : 190
         }
@@ -456,12 +436,12 @@ export default function MapPage() {
                 </BackButton>
                 <Title>메모리 오브</Title>
               </HeaderLeft>
-            ) : selectedSpot ? (
+            ) : selectedPlace ? (
               <HeaderLeft>
                 <BackButton onClick={handleBack}>
                   <img src="/images/expand_left.svg" alt="뒤로가기" />
                 </BackButton>
-                <Title>{selectedSpot.name}</Title>
+                <Title>{selectedPlace.name}</Title>
               </HeaderLeft>
             ) : (
               <>
@@ -482,43 +462,38 @@ export default function MapPage() {
             <ScrollContent>
               <div style={{ padding: "20px 0" }}>
                 <SectionTitle style={{ marginBottom: 4 }}>
-                  {selectedMemory.title}
+                  메모리 상세
                 </SectionTitle>
-                <MemoryTags>
-                  {selectedMemory.tags?.map((tag) => (
-                    <Tag key={tag}>{tag}</Tag>
-                  ))}
-                </MemoryTags>
+                <DetailImageWrapper>
+                  <DetailImage
+                    src={selectedMemory.url || "/images/placeholder-spot.png"}
+                    alt="메모리"
+                  />
+                </DetailImageWrapper>
                 <MemoryMetaInfo>
-                  <span>📍 {selectedMemory.location}</span>
-                  <span>·</span>
-                  <span>{selectedMemory.date}</span>
+                  <span>{selectedMemory.description}</span>
                 </MemoryMetaInfo>
               </div>
             </ScrollContent>
-          ) : selectedSpot ? (
+          ) : selectedPlace ? (
             <ScrollContent>
               <SpotMeta>
-                <SpotSubtitle>부산광역시의 관광명소</SpotSubtitle>
+                <SpotSubtitle>관광명소</SpotSubtitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src={
-                      selectedSpot.image_url || "/images/placeholder-spot.png"
-                    }
-                    alt={selectedSpot.name}
+                    src="/images/placeholder-spot.png"
+                    alt={selectedPlace.name}
                   />
                 </DetailImageWrapper>
                 <MetaRow>
                   <img src="/images/location-icon.svg" alt="위치" />
-                  {selectedSpot.address || "부산 영도구 영선동 4가 605-3"}
+                  {selectedPlace.name}
                 </MetaRow>
                 <StatsRow>
                   <StatItem>
                     <img src="/images/symbolLogoBlack.svg" alt="" />
-                    225개
+                    {memories.length}개
                   </StatItem>
-                  <span>·</span>
-                  <span>1.2km</span>
                 </StatsRow>
               </SpotMeta>
 
@@ -530,25 +505,25 @@ export default function MapPage() {
                     onClick={() => handleMemoryClick(memory.id)}
                     style={{ cursor: "pointer" }}
                   >
-                    <MemoryImage src={memory.image_url} />
+                    <MemoryImage src={memory.url} />
                     <MemoryGradient />
-                    <MemoryOverlay>{memory.title}</MemoryOverlay>
+                    <MemoryOverlay>{memory.description}</MemoryOverlay>
                   </MemoryOrbItem>
                 ))}
               </MemoryOrbList>
             </ScrollContent>
           ) : loading || geoLoading ? (
             <LoadingMessage>로딩 중...</LoadingMessage>
-          ) : spotsWithDistance.length === 0 ? (
+          ) : placesWithDistance.length === 0 ? (
             <LoadingMessage>주변에 명소가 없습니다.</LoadingMessage>
           ) : (
             <SpotList>
-              {spotsWithDistance.map((spot) => (
+              {placesWithDistance.map((place) => (
                 <SpotCard
-                  key={spot.id}
-                  spot={spot}
-                  distance={spot.distance}
-                  onClick={() => handleSpotCardClick(spot.id)}
+                  key={place.id}
+                  spot={place}
+                  distance={place.distance}
+                  onClick={() => handlePlaceCardClick(place.id)}
                 />
               ))}
             </SpotList>
