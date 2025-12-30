@@ -3,7 +3,7 @@ import { theme } from "@/shared/styles/theme";
 import { H4, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { moviesApi, type MovieDetail } from "@/features/videoGen/api";
 
 const PageContainer = styled.div`
@@ -20,6 +20,7 @@ const VideoBackground = styled.div`
   width: 100%;
   height: 100%;
   z-index: 0;
+  cursor: pointer;
 
   video, img {
     width: 100%;
@@ -40,6 +41,7 @@ const GradientOverlay = styled.div`
     rgba(0, 0, 0, 0.7) 100%
   );
   z-index: 1;
+  pointer-events: none;
 `;
 
 const ContentOverlay = styled.div`
@@ -49,6 +51,11 @@ const ContentOverlay = styled.div`
   display: flex;
   flex-direction: column;
   padding-bottom: 100px;
+  pointer-events: none;
+
+  button, a {
+    pointer-events: auto;
+  }
 `;
 
 const TopBar = styled.div`
@@ -146,6 +153,8 @@ export default function VideoViewPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const loadMovie = async () => {
@@ -171,6 +180,18 @@ export default function VideoViewPage() {
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
+  };
+
+  const handleVideoClick = () => {
+    if (!videoRef.current) return;
+
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
   };
 
   if (loading) {
@@ -208,9 +229,10 @@ export default function VideoViewPage() {
 
   return (
     <PageContainer>
-      <VideoBackground>
+      <VideoBackground onClick={handleVideoClick}>
         {movie.videoUrl ? (
           <video
+            ref={videoRef}
             src={movie.videoUrl}
             autoPlay
             loop
