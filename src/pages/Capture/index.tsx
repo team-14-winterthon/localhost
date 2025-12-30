@@ -31,7 +31,7 @@ const StatusBar = styled.div`
 `;
 
 const LogoHeader = styled.header`
-  padding: 56px 20px 20px;
+  padding: 46px 20px 20px;
   display: flex;
   justify-content: flex-start;
   align-items: center;

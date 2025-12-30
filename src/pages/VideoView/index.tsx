@@ -51,7 +51,7 @@ const ContentOverlay = styled.div`
 `;
 
 const TopBar = styled.div`
-  padding: 56px 20px 20px;
+  padding: 46px 20px 20px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;

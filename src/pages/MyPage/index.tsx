@@ -16,7 +16,7 @@ const PageContainer = styled.div`
 `;
 
 const Header = styled.header`
-  padding: 56px 20px 20px;
+  padding: 46px 20px 20px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -127,26 +127,31 @@ export default function MyPage() {
   // 예시 메모리 데이터 (실제로는 API에서 가져와야 함)
   const memories = [
     {
+      id: "1",
       date: 14,
       imageUrl:
         "https://i.namu.wiki/i/WUqTz6CNMmzWjId-_CjPfZkpmr20NG8vswcEG7_TspuOWIGQpEsWVOKs4V11LQBANRxQIffwibuA3BCHF2tn_Qq2zM2M1fRPhRBqMnzCQRyHBbdyZ2ypSbD1MAT701GIvAcUI9QTzfTlFjVpbtjcbw.webp",
     },
     {
+      id: "2",
       date: 16,
       imageUrl:
         "https://i.namu.wiki/i/uZHMjj8vEa6RaIMndBMCXPLN9_FJq65EUqwPwo0AB6HGvf0Z_hz2rlradyjSbyaOrQrEapPIgAZ9mBVF1do-qPqIq_fVlVH4uFR3wfg6TY_8Gu9T1mkny0fzMQJRdhBe5gl_PiPku-ppk-YJ__xYcw.webp",
     },
     {
+      id: "3",
       date: 19,
       imageUrl:
         "https://i.namu.wiki/i/WUqTz6CNMmzWjId-_CjPfZkpmr20NG8vswcEG7_TspuOWIGQpEsWVOKs4V11LQBANRxQIffwibuA3BCHF2tn_Qq2zM2M1fRPhRBqMnzCQRyHBbdyZ2ypSbD1MAT701GIvAcUI9QTzfTlFjVpbtjcbw.webp",
     },
     {
+      id: "4",
       date: 24,
       imageUrl:
         "https://i.namu.wiki/i/uZHMjj8vEa6RaIMndBMCXPLN9_FJq65EUqwPwo0AB6HGvf0Z_hz2rlradyjSbyaOrQrEapPIgAZ9mBVF1do-qPqIq_fVlVH4uFR3wfg6TY_8Gu9T1mkny0fzMQJRdhBe5gl_PiPku-ppk-YJ__xYcw.webp",
     },
     {
+      id: "5",
       date: 27,
       imageUrl:
         "https://i.namu.wiki/i/WUqTz6CNMmzWjId-_CjPfZkpmr20NG8vswcEG7_TspuOWIGQpEsWVOKs4V11LQBANRxQIffwibuA3BCHF2tn_Qq2zM2M1fRPhRBqMnzCQRyHBbdyZ2ypSbD1MAT701GIvAcUI9QTzfTlFjVpbtjcbw.webp",

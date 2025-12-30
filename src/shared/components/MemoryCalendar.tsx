@@ -1,10 +1,12 @@
 import styled from "@emotion/styled";
+import { useNavigate } from "react-router-dom";
 import { theme } from "@/shared/styles/theme";
 import { H2, P3 } from "@/shared/components/Typography";
 
 interface Memory {
   date: number;
   imageUrl: string;
+  id?: string;
 }
 
 interface MemoryCalendarProps {
@@ -80,11 +82,12 @@ const DateCell = styled.div`
   position: relative;
 `;
 
-const DateText = styled(P3)`
+const DateText = styled(P3)<{ hasMemory?: boolean }>`
   color: ${theme.colors.base.black};
   letter-spacing: 0.24px;
   position: relative;
   z-index: 1;
+  opacity: ${(props) => (props.hasMemory ? 0 : 1)};
 `;
 
 const MemoryImage = styled.div`
@@ -94,6 +97,11 @@ const MemoryImage = styled.div`
   width: 38px;
   height: 48px;
   overflow: hidden;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.8;
+  }
 
   img {
     width: 100%;
@@ -112,11 +120,19 @@ export default function MemoryCalendar({
   onPrevMonth,
   onNextMonth,
 }: MemoryCalendarProps) {
+  const navigate = useNavigate();
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  const getMemoryForDate = (date: number): string | undefined => {
-    return memories.find((m) => m.date === date)?.imageUrl;
+  const getMemoryForDate = (date: number): Memory | undefined => {
+    return memories.find((m) => m.date === date);
+  };
+
+  const handleMemoryClick = (memory: Memory) => {
+    // 메모리 오브 상세 페이지로 이동 (나중에 구현될 페이지)
+    if (memory.id) {
+      navigate(`/memory/${memory.id}`);
+    }
   };
 
   const renderDates = () => {
@@ -129,15 +145,15 @@ export default function MemoryCalendar({
 
     // Add date cells
     for (let date = 1; date <= daysInMonth; date++) {
-      const memoryImage = getMemoryForDate(date);
+      const memory = getMemoryForDate(date);
       dates.push(
         <DateCell key={date}>
-          {memoryImage && (
-            <MemoryImage>
-              <img src={memoryImage} alt={`Memory ${date}`} />
+          {memory && (
+            <MemoryImage onClick={() => handleMemoryClick(memory)}>
+              <img src={memory.imageUrl} alt={`Memory ${date}`} />
             </MemoryImage>
           )}
-          <DateText>{date}</DateText>
+          <DateText hasMemory={!!memory}>{date}</DateText>
         </DateCell>
       );
     }

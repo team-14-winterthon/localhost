@@ -19,6 +19,7 @@ import MovieResultPage from "@/pages/MovieResult";
 import VideoViewPage from "@/pages/VideoView";
 import MyPage from "@/pages/MyPage";
 import MapPage from "@/pages/Map";
+import MemoryDetailPage from "@/pages/MemoryDetail";
 import "./App.css";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/movie/create" element={<MovieCreatePage />} />
         <Route path="/movie/result" element={<MovieResultPage />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/memory/:id" element={<MemoryDetailPage />} />
       </Routes>
       <Toaster position="top-center" />
     </ThemeProvider>

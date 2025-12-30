@@ -490,7 +490,10 @@ export default function MapPage() {
                   ))}
                 </MemoryTags>
                 <MemoryMetaInfo>
-                  <span>📍 {selectedMemory.location}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <img src="/images/location-icon.svg" alt="위치" style={{ width: '14px', height: '16px' }} />
+                    {selectedMemory.location}
+                  </span>
                   <span>·</span>
                   <span>{selectedMemory.date}</span>
                 </MemoryMetaInfo>
