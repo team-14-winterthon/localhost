@@ -4,36 +4,70 @@ import type {
   MovieCreateRequest,
   MovieCreateResponse,
 } from '@/features/videoGen/api'
+import { IMAGES } from './places'
+
+// 샘플 비디오 URL
+const SAMPLE_VIDEO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
 
 export const mockMovies: Movie[] = [
   {
     id: 'movie-1',
     title: '자갈치시장 먹방 브이로그',
-    thumbnailUrl: 'https://picsum.photos/seed/movie-jagalchi/400/300',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: IMAGES.jagalchi,
+    videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '브이로그',
-    createdAt: '2024-12-15T10:30:00.000Z',
+    createdAt: '2024-12-20T10:30:00.000Z',
     status: true,
   },
   {
     id: 'movie-2',
     title: '해운대 여름 휴가',
-    thumbnailUrl: 'https://picsum.photos/seed/movie-haeundae/400/300',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: IMAGES.haeundae,
+    videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '다큐멘터리',
-    createdAt: '2024-12-10T14:20:00.000Z',
+    createdAt: '2024-12-18T14:20:00.000Z',
     status: true,
   },
   {
     id: 'movie-3',
     title: '다대포 낙조의 추억',
-    thumbnailUrl: 'https://picsum.photos/seed/movie-dadaepo/400/300',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl: IMAGES.dadaepo,
+    videoUrl: SAMPLE_VIDEO,
     dong: '부산',
     mood: '코미디',
-    createdAt: '2024-12-05T09:00:00.000Z',
+    createdAt: '2024-12-15T09:00:00.000Z',
+    status: true,
+  },
+  {
+    id: 'movie-4',
+    title: '부산 맛집 투어',
+    thumbnailUrl: IMAGES.jagalchi,
+    videoUrl: SAMPLE_VIDEO,
+    dong: '부산',
+    mood: '브이로그',
+    createdAt: '2024-12-12T16:45:00.000Z',
+    status: true,
+  },
+  {
+    id: 'movie-5',
+    title: '해운대 서핑 도전기',
+    thumbnailUrl: IMAGES.haeundae,
+    videoUrl: SAMPLE_VIDEO,
+    dong: '부산',
+    mood: '코미디',
+    createdAt: '2024-12-10T11:00:00.000Z',
+    status: true,
+  },
+  {
+    id: 'movie-6',
+    title: '다대포 힐링 산책',
+    thumbnailUrl: IMAGES.dadaepo,
+    videoUrl: SAMPLE_VIDEO,
+    dong: '부산',
+    mood: '다큐멘터리',
+    createdAt: '2024-12-08T08:30:00.000Z',
     status: true,
   },
 ]
@@ -43,38 +77,63 @@ export const mockMovieDetails: Record<string, MovieDetail> = {
     id: 'movie-1',
     title: '자갈치시장 먹방 브이로그',
     userId: 'user-1',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    videoUrl: SAMPLE_VIDEO,
     duration: 180,
   },
   'movie-2': {
     id: 'movie-2',
     title: '해운대 여름 휴가',
     userId: 'user-1',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    videoUrl: SAMPLE_VIDEO,
     duration: 240,
   },
   'movie-3': {
     id: 'movie-3',
     title: '다대포 낙조의 추억',
     userId: 'user-1',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    videoUrl: SAMPLE_VIDEO,
     duration: 150,
+  },
+  'movie-4': {
+    id: 'movie-4',
+    title: '부산 맛집 투어',
+    userId: 'user-1',
+    videoUrl: SAMPLE_VIDEO,
+    duration: 200,
+  },
+  'movie-5': {
+    id: 'movie-5',
+    title: '해운대 서핑 도전기',
+    userId: 'user-1',
+    videoUrl: SAMPLE_VIDEO,
+    duration: 165,
+  },
+  'movie-6': {
+    id: 'movie-6',
+    title: '다대포 힐링 산책',
+    userId: 'user-1',
+    videoUrl: SAMPLE_VIDEO,
+    duration: 190,
   },
 }
 
 // 영화 생성 시 사용할 카운터
-let movieIdCounter = 4
+let movieIdCounter = 7
 
 export function createMockMovie(request: MovieCreateRequest): MovieCreateResponse {
   const id = `movie-${movieIdCounter++}`
   const now = new Date().toISOString()
 
+  // 썸네일은 랜덤 부산 이미지 중 하나 사용
+  const imageUrls = [IMAGES.jagalchi, IMAGES.haeundae, IMAGES.dadaepo]
+  const thumbnailUrl = imageUrls[Math.floor(Math.random() * imageUrls.length)]
+
   // 생성된 영화를 목록에 추가
   const newMovie: Movie = {
     id,
     title: `${request.dong} ${request.mood} 영화`,
-    thumbnailUrl: `https://picsum.photos/seed/${id}/400/300`,
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnailUrl,
+    videoUrl: SAMPLE_VIDEO,
     dong: request.dong,
     mood: request.mood,
     createdAt: now,

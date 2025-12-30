@@ -152,7 +152,7 @@ function MapMarkerComponent({
 
 export default function LeafletMap({
   markers = [],
-  center = { lat: 37.5665, lng: 126.978 }, // 서울 기본 위치
+  center = { lat: 35.0967, lng: 129.0303 }, // 부산 자갈치시장 기본 위치
   zoom = 15,
   onMapClick,
   onMarkerClick,

@@ -1,21 +1,22 @@
 import type { AuthPhoto, UploadPhotoResponse } from '@/features/media/api'
+import { IMAGES } from './places'
 
 export const mockAuthPhotos: AuthPhoto[] = [
   {
     id: 'photo-1',
-    url: 'https://picsum.photos/seed/jagalchi-photo/800/600',
+    url: IMAGES.jagalchi,
     description: '자갈치시장에서 싱싱한 회 한 접시! 역시 부산이 맛있어요.',
     isVerified: true,
   },
   {
     id: 'photo-2',
-    url: 'https://picsum.photos/seed/haeundae-photo/800/600',
+    url: IMAGES.haeundae,
     description: '해운대해수욕장에서 찍은 인증샷! 파도가 정말 시원했어요.',
     isVerified: true,
   },
   {
     id: 'photo-3',
-    url: 'https://picsum.photos/seed/dadaepo-photo/800/600',
+    url: IMAGES.dadaepo,
     description: '다대포해수욕장 낙조분수쇼! 노을과 함께 너무 예뻤어요.',
     isVerified: true,
   },
@@ -48,7 +49,9 @@ export function uploadPhoto(
   description?: string
 ): UploadPhotoResponse {
   const id = `photo-${photoIdCounter++}`
-  const url = `https://picsum.photos/seed/${id}/800/600`
+  // 업로드된 사진은 랜덤 부산 이미지 중 하나 사용
+  const imageUrls = [IMAGES.jagalchi, IMAGES.haeundae, IMAGES.dadaepo]
+  const url = imageUrls[Math.floor(Math.random() * imageUrls.length)]
   const desc = description || `${spotId}에서 찍은 사진`
 
   const newPhoto: AuthPhoto = {
