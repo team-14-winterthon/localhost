@@ -3,8 +3,8 @@ import { theme } from "@/shared/styles/theme";
 import { H2, H4, P3, P4 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { moviesApi, type Movie } from "@/features/videoGen/api";
+import { useState } from "react";
+import { useMyMovies } from "@/shared/hooks";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.gray[100]};
@@ -205,25 +205,9 @@ interface MovieListPageProps {
 export default function MovieListPage({ type = "my" }: MovieListPageProps) {
   const navigate = useNavigate();
   const [sortOrder] = useState("기본순");
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        setLoading(true);
-        // GET /movies/my
-        const data = await moviesApi.getMyMovies();
-        setMovies(data);
-      } catch (error) {
-        console.error("영화 목록 로드 실패:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMovies();
-  }, []);
+  // React Query로 영화 목록 조회
+  const { data: movies = [], isLoading } = useMyMovies();
 
   const pageTitle = type === "my" ? "내가 만든 영화" : "인기 영화관";
 
@@ -247,7 +231,7 @@ export default function MovieListPage({ type = "my" }: MovieListPageProps) {
           </SortDropdown>
         </TitleBar>
 
-        {loading ? (
+        {isLoading ? (
           <P3 style={{ textAlign: "center", padding: "40px 0" }}>로딩 중...</P3>
         ) : movies.length === 0 ? (
           <P3 style={{ textAlign: "center", padding: "40px 0" }}>

@@ -1,9 +1,12 @@
 import styled from '@emotion/styled'
-import type { Spot } from '../types'
+import type { Spot, Place } from '../types'
 import { H4, P3 } from '@/shared/components/Typography'
 
+// SpotCard can accept either Spot or Place type
+type SpotOrPlace = Spot | (Place & { lat?: number; lng?: number; image_url?: string; description?: string })
+
 interface SpotCardProps {
-  spot: Spot
+  spot: SpotOrPlace
   distance?: number
   onClick?: () => void
 }

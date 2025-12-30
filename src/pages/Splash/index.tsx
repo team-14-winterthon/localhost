@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
 import { P1 } from '@/shared/components/Typography';
 import { safeAreaPatterns } from '@/shared/styles/safeArea';
 import { authApi } from '@/features/auth/api';
+import { useAuthStore } from '@/shared/stores';
 
 const Container = styled.div`
   position: relative;
@@ -105,10 +107,17 @@ const ButtonText = styled(P1)`
   white-space: nowrap;
 `;
 
-
-
 export default function SplashPage() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
+
+  // 이미 로그인되어 있으면 홈으로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -122,6 +131,11 @@ export default function SplashPage() {
       setIsLoading(false);
     }
   };
+
+  // 로딩 중이면 빈 화면 표시
+  if (authLoading) {
+    return <Container><StatusBar /></Container>;
+  }
 
   return (
     <Container>
