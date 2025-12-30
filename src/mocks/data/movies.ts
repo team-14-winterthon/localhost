@@ -6,8 +6,8 @@ import type {
 } from '@/features/videoGen/api'
 import { IMAGES } from './places'
 
-// 샘플 비디오 URL
-const SAMPLE_VIDEO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+// 샘플 비디오 URL (W3Schools 제공)
+const SAMPLE_VIDEO = 'https://www.w3schools.com/html/mov_bbb.mp4'
 
 export const mockMovies: Movie[] = [
   {
