@@ -31,6 +31,9 @@ const NavItem = styled.button<{ active?: boolean }>`
   img {
     width: 32px;
     height: 32px;
+    filter: ${props => props.active
+      ? 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(346deg) brightness(98%) contrast(97%)'
+      : 'none'};
   }
 
   &:active {
@@ -54,16 +57,23 @@ export default function Navbar() {
     { path: '/mypage', icon: '/images/user-alt.svg', label: '마이' },
   ];
 
+  const isActive = (itemPath: string) => {
+    if (itemPath === '/video') {
+      return location.pathname.startsWith('/video') || location.pathname.startsWith('/movie');
+    }
+    return location.pathname === itemPath;
+  };
+
   return (
     <Container>
       {navItems.map(item => (
         <NavItem
           key={item.path}
-          active={location.pathname === item.path}
+          active={isActive(item.path)}
           onClick={() => navigate(item.path)}
         >
           <img src={item.icon} alt={item.label} />
-          <NavText active={location.pathname === item.path}>{item.label}</NavText>
+          <NavText active={isActive(item.path)}>{item.label}</NavText>
         </NavItem>
       ))}
     </Container>
