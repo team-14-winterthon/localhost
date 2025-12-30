@@ -237,8 +237,7 @@ export default function MovieCreatePage() {
 
   const handleSubmit = () => {
     if (isFormValid) {
-      // TODO: 다음 페이지로 이동
-      console.log("Submit:", { selectedPlace, selectedMood });
+      navigate("/movie/result");
     }
   };
 

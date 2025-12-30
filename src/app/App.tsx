@@ -15,6 +15,8 @@ import VideoResultPage from '@/pages/VideoResult'
 import MoviePage from '@/pages/Movie'
 import MovieListPage from '@/pages/MovieList'
 import MovieCreatePage from '@/pages/MovieCreate'
+import MovieResultPage from '@/pages/MovieResult'
+import VideoViewPage from '@/pages/VideoView'
 import './App.css'
 
 function App() {
@@ -34,7 +36,9 @@ function App() {
         <Route path="/video" element={<MoviePage />} />
         <Route path="/video/my" element={<MovieListPage type="my" />} />
         <Route path="/video/popular" element={<MovieListPage type="popular" />} />
+        <Route path="/video/view/:id" element={<VideoViewPage />} />
         <Route path="/movie/create" element={<MovieCreatePage />} />
+        <Route path="/movie/result" element={<MovieResultPage />} />
       </Routes>
       <Toaster position="top-center" />
     </ThemeProvider>

@@ -66,8 +66,9 @@ const MoreLink = styled.a`
 
 const MovieListContainer = styled.div`
   display: flex;
-  gap: 8px;
+  gap: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-left: 20px;
@@ -130,12 +131,13 @@ const PopularMovieCard = styled.div`
   background-color: ${theme.colors.gray[800]};
   overflow: hidden;
   padding: 10px;
-  min-width: 150px;
-  width: 150px;
+  min-width: 170px;
+  width: 170px;
   height: 320px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-shrink: 0;
 `;
 
 const PopularMovieImage = styled.div`
