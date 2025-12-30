@@ -5,6 +5,7 @@ import Navbar from "@/shared/components/Navbar";
 import HighlightFilmCard from "@/shared/components/HighlightFilmCard";
 import MovieFilmCard from "@/shared/components/MovieFilmCard";
 import { useNavigate } from "react-router-dom";
+import { useMyMovies } from "@/shared/hooks";
 
 const PageContainer = styled.div`
   background-color: white;
@@ -158,6 +159,7 @@ const MovieScroll = styled.div`
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { data: movies = [] } = useMyMovies();
 
   return (
     <PageContainer>
@@ -192,24 +194,15 @@ export default function HomePage() {
             </SectionLink>
           </SectionHeader>
           <MovieScroll>
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/1")}
-            />
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/2")}
-            />
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/3")}
-            />
+            {movies.slice(0, 3).map((movie) => (
+              <MovieFilmCard
+                key={movie.id}
+                imageSrc={movie.thumbnailUrl || "/images/placeholder-movie.jpg"}
+                author={movie.dong}
+                title={movie.title}
+                onClick={() => navigate(`/video/view/${movie.id}`)}
+              />
+            ))}
           </MovieScroll>
         </PopularSection>
       </Main>
