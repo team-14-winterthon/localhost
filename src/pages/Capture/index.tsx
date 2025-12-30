@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
@@ -27,11 +29,27 @@ const StatusBar = styled.div`
   z-index: 100;
 `;
 
+const Logo = styled.div`
+  width: 76px;
+  height: 28px;
+  margin-top: 20px;
+  margin-left: 20px;
+  align-self: flex-start;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
 const Header = styled.header`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 54px 20px 0;
+  padding: 20px 20px 0;
+  width: 100%;
 `;
 
 const BackButton = styled.button`
@@ -45,6 +63,7 @@ const BackButton = styled.button`
   justify-content: center;
   cursor: pointer;
   min-height: auto;
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -56,49 +75,39 @@ const Title = styled(H2)`
   color: ${theme.colors.base.black};
 `;
 
-const Logo = styled.div`
-  position: fixed;
-  top: 56px;
-  left: 20px;
-  width: 76px;
-  height: 28px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
 const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 44px;
-  padding: 122px 20px 0;
+  padding: 40px 20px 0;
   flex: 1;
+  width: 100%;
 `;
 
 const PhotoUploadArea = styled.div`
-  width: 116px;
-  height: 137px;
-  background-color: ${theme.colors.gray[300]};
+  width: 300px;
+  height: 300px;
+  background-color: ${theme.colors.gray[200]};
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-
-  img {
-    width: 24px;
-    height: 24px;
-  }
+  border-radius: 20px;
 
   &:active {
     opacity: 0.8;
   }
 `;
+
+const CameraIcon = styled.img`
+  width: 24px;
+  height: 24px;
+`;
+
+
 
 const PhotoPreview = styled.img`
   width: 100%;
@@ -109,34 +118,37 @@ const PhotoPreview = styled.img`
 const InputGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   width: 100%;
-  max-width: 336px;
+  max-width: 335px;
 `;
 
 const Label = styled(P2)`
   color: ${theme.colors.gray[600]};
+  width: 100%;
+  text-align: left;
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
-  padding: 12px;
-  border: 1px solid ${theme.colors.gray[400]};
-  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid ${theme.colors.primary[300]};
+  border-radius: 12px;
   font-family: ${theme.typography.p2.fontFamily};
   font-size: ${theme.typography.p2.fontSize};
   color: ${theme.colors.base.black};
   background-color: ${theme.colors.gray[100]};
   resize: none;
-  min-height: 41px;
+  min-height: 52px;
 
   &::placeholder {
-    color: ${theme.colors.gray[600]};
+    color: ${theme.colors.gray[500]};
   }
 
   &:focus {
     outline: none;
     border-color: ${theme.colors.primary[500]};
+    background-color: ${theme.colors.gray[100]};
   }
 `;
 
@@ -148,7 +160,7 @@ const ErrorMessage = styled(P2)`
 
 const BottomSection = styled.div`
   position: fixed;
-  bottom: 93px;
+  bottom: 113px;
   left: 0;
   right: 0;
   padding: 0 20px;
@@ -187,23 +199,13 @@ const SubmitButton = styled.button`
   }
 `;
 
-const HomeIndicator = styled.div`
-  width: 135px;
-  height: 5px;
-  background-color: ${theme.colors.gray[800]};
-  border-radius: 2.5px;
-  position: fixed;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-`;
-
 interface CapturePageProps {
   showError?: boolean;
 }
 
 export default function CapturePage({ showError = false }: CapturePageProps) {
   const navigate = useNavigate();
+
   const [photo, setPhoto] = useState<string | null>(null);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -213,9 +215,48 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
     navigate(-1);
   };
 
-  const handlePhotoClick = () => {
-    // TODO: Implement Capacitor Camera API
-    toast('카메라 기능은 준비 중입니다');
+  const openCamera = async () => {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+      });
+
+      if (image.webPath) {
+        setPhoto(image.webPath);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+    }
+  };
+
+  const handlePhotoClick = async () => {
+    if (photo) {
+      const result = await ActionSheet.showActions({
+        options: [
+          {
+            title: '사진 수정하기',
+          },
+          {
+            title: '사진 삭제하기',
+            style: ActionSheetButtonStyle.Destructive,
+          },
+          {
+            title: '취소',
+            style: ActionSheetButtonStyle.Cancel,
+          },
+        ],
+      });
+
+      if (result.index === 0) {
+        openCamera();
+      } else if (result.index === 1) {
+        setPhoto(null);
+      }
+    } else {
+      openCamera();
+    }
   };
 
   const handleSubmit = async () => {
@@ -266,7 +307,7 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
           {photo ? (
             <PhotoPreview src={photo} alt="업로드한 사진" />
           ) : (
-            <img src="/images/camera-icon.svg" alt="카메라" />
+            <CameraIcon src="/images/camera-icon.svg" alt="카메라" />
           )}
         </PhotoUploadArea>
 
@@ -291,8 +332,9 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
         </SubmitButton>
       </BottomSection>
 
+
+
       <Navbar />
-      <HomeIndicator />
     </Container>
   );
 }

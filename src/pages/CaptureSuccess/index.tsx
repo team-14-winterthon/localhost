@@ -26,11 +26,12 @@ const StatusBar = styled.div`
 `;
 
 const Logo = styled.div`
-  position: fixed;
-  top: 56px;
-  left: 20px;
   width: 76px;
   height: 28px;
+  margin-top: 20px;
+  margin-left: 20px;
+  align-self: flex-start;
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -43,49 +44,54 @@ const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 44px;
-  padding: 122px 20px 0;
-  flex: 1;
+  gap: 32px;
+  padding: 80px 20px 0;
+  width: 100%;
 `;
 
 const SuccessTitle = styled(H2)`
   color: ${theme.colors.base.black};
   text-align: center;
+  margin-top: 20px;
+  font-size: 28px;
+  font-weight: 700;
 `;
 
 const SymbolLogo = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 154px;
+  height: 154px;
 
   img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
   }
 `;
 
 const InfoContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
   align-items: center;
 `;
 
 const TagsContainer = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 `;
 
 const Tag = styled.div`
   background-color: ${theme.colors.gray[200]};
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
 `;
 
 const TagText = styled(H4)`
   color: ${theme.colors.base.black};
   text-align: center;
+  font-weight: 700;
+  font-size: 16px;
 `;
 
 const LocationContainer = styled.div`
@@ -149,16 +155,7 @@ const BackButton = styled.button`
   }
 `;
 
-const HomeIndicator = styled.div`
-  width: 135px;
-  height: 5px;
-  background-color: ${theme.colors.gray[800]};
-  border-radius: 2.5px;
-  position: fixed;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-`;
+
 
 interface LocationState {
   tags?: string[];
@@ -222,7 +219,6 @@ export default function CaptureSuccessPage() {
       </BottomSection>
 
       <Navbar />
-      <HomeIndicator />
     </Container>
   );
 }
