@@ -32,25 +32,64 @@ async function request<T = unknown>(
   // Get token from localStorage
   const token = !skipAuth ? localStorage.getItem('authToken') : null
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...headers,
-    },
-  })
+  try {
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...headers,
+      },
+    })
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null)
-    throw new ApiError(
-      response.status,
-      errorData?.message || response.statusText,
-      errorData
-    )
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type')
+    const isJson = contentType?.includes('application/json')
+
+    if (!response.ok) {
+      const errorData = isJson ? await response.json().catch(() => null) : null
+
+      // Better error message for common issues
+      if (!env.api.baseUrl) {
+        throw new ApiError(
+          response.status,
+          'API 서버 주소가 설정되지 않았습니다. .env 파일을 확인해주세요.',
+          errorData
+        )
+      }
+
+      throw new ApiError(
+        response.status,
+        errorData?.message || response.statusText,
+        errorData
+      )
+    }
+
+    if (!isJson) {
+      throw new ApiError(
+        500,
+        'API 서버가 응답하지 않습니다. 백엔드 서버가 실행 중인지 확인해주세요.',
+        null
+      )
+    }
+
+    return response.json()
+  } catch (error) {
+    // Network errors (CORS, connection refused, etc.)
+    if (error instanceof ApiError) {
+      throw error
+    }
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new ApiError(
+        0,
+        'API 서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인해주세요.',
+        null
+      )
+    }
+
+    throw error
   }
-
-  return response.json()
 }
 
 export const apiClient = {

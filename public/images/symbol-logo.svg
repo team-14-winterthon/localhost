@@ -1,0 +1,23 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="SymbolLogo">
+<circle id="Ellipse 47" cx="50" cy="50" r="50" fill="var(--fill-0, #FE5B32)"/>
+<g id="Ellipse 48" filter="url(#filter0_f_166_1988)">
+<ellipse cx="40.1086" cy="72.9143" rx="26.2053" ry="17.1648" transform="rotate(16.1087 40.1086 72.9143)" fill="var(--fill-0, #FFB7A5)"/>
+</g>
+<g id="Star 2" filter="url(#filter1_f_166_1988)">
+<path d="M60.5 12L65.7668 26.2332L80 31.5L65.7668 36.7668L60.5 51L55.2332 36.7668L41 31.5L55.2332 26.2332L60.5 12Z" fill="var(--fill-0, white)"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_166_1988" x="6.48101" y="46.8872" width="67.2552" height="52.0543" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="4" result="effect1_foregroundBlur_166_1988"/>
+</filter>
+<filter id="filter1_f_166_1988" x="39" y="10" width="43" height="43" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_166_1988"/>
+</filter>
+</defs>
+</svg>

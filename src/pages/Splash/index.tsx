@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
 import { P1 } from '@/shared/components/Typography';
@@ -15,7 +14,6 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   ${safeAreaPatterns.fullScreen}
 `;
 
@@ -33,7 +31,8 @@ const MainContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
+  width: 100%;
   margin-top: 210px;
 `;
 
@@ -46,38 +45,40 @@ const LogoContainer = styled.div`
 const LogoImage = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 `;
 
 const Tagline = styled(P1)`
-  color: ${theme.colors.base.black};
+  color: ${theme.colors.gray[900]};
   text-align: center;
   white-space: nowrap;
 `;
 
 const BottomSection = styled.div`
   width: 100%;
-  padding: 0 20px 34px;
+  padding: 0 20px 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 21px;
+  gap: 20px;
+  margin-top: auto;
 `;
 
 const GoogleButton = styled.button`
   width: 100%;
-  max-width: 334px;
+  max-width: 335px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  padding: 12px;
+  gap: 8px;
+  padding: 14px;
   background-color: ${theme.colors.gray[100]};
-  border: 1px solid ${theme.colors.gray[500]};
-  border-radius: 6px;
+  border: 1px solid ${theme.colors.gray[200]};
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 48px;
+  min-height: 52px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
 
   &:active {
     background-color: ${theme.colors.gray[200]};
@@ -92,26 +93,21 @@ const GoogleButton = styled.button`
 `;
 
 const GoogleIcon = styled.img`
-  width: 23px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 `;
 
 const ButtonText = styled(P1)`
-  color: ${theme.colors.gray[900]};
+  color: ${theme.colors.base.black};
+  font-weight: 600;
   text-align: center;
   white-space: nowrap;
 `;
 
-const HomeIndicator = styled.div`
-  width: 135px;
-  height: 5px;
-  background-color: ${theme.colors.gray[800]};
-  border-radius: 2.5px;
-`;
+
 
 export default function SplashPage() {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -146,7 +142,6 @@ export default function SplashPage() {
           <GoogleIcon src="/images/google-icon.png" alt="Google" />
           <ButtonText>{isLoading ? '로그인 중...' : '구글으로 로그인하기'}</ButtonText>
         </GoogleButton>
-        <HomeIndicator />
       </BottomSection>
     </Container>
   );

@@ -9,6 +9,7 @@ import HomePage from '@/pages/Home'
 import LoginPage from '@/pages/Login'
 import SpotDetailPage from '@/pages/SpotDetail'
 import CapturePage from '@/pages/Capture'
+import CaptureSuccessPage from '@/pages/CaptureSuccess'
 import VideoCreatePage from '@/pages/VideoCreate'
 import VideoResultPage from '@/pages/VideoResult'
 import './App.css'
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/spots/:id" element={<SpotDetailPage />} />
         <Route path="/capture" element={<CapturePage />} />
+        <Route path="/capture/success" element={<CaptureSuccessPage />} />
         <Route path="/video/create" element={<VideoCreatePage />} />
         <Route path="/video/result/:id" element={<VideoResultPage />} />
       </Routes>
