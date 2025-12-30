@@ -33,17 +33,10 @@ export const authPhotosHandlers = [
   }),
 
   // GET /auth-photos/my - 나의 인증사진 목록
-  http.get(`${BASE_URL}/auth-photos/my`, async ({ request }) => {
+  http.get(`${BASE_URL}/auth-photos/my`, async () => {
     await delay(400)
 
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return HttpResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
+    // 개발 환경에서는 인증 체크 생략 (테스트 편의)
     const photos = getMyPhotos()
     return HttpResponse.json(photos)
   }),
@@ -52,14 +45,7 @@ export const authPhotosHandlers = [
   http.get(`${BASE_URL}/auth-photos/my-memories`, async ({ request }) => {
     await delay(400)
 
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return HttpResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
+    // 개발 환경에서는 인증 체크 생략 (테스트 편의)
     const url = new URL(request.url)
     const dong = url.searchParams.get('dong') || undefined
 
