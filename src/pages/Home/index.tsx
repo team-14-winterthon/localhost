@@ -5,6 +5,7 @@ import Navbar from "@/shared/components/Navbar";
 import HighlightFilmCard from "@/shared/components/HighlightFilmCard";
 import MovieFilmCard from "@/shared/components/MovieFilmCard";
 import { useNavigate } from "react-router-dom";
+import { useVideos } from "@/features/videos/hooks";
 
 const PageContainer = styled.div`
   background-color: white;
@@ -155,6 +156,9 @@ const MovieScroll = styled.div`
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { data: videosData } = useVideos({ limit: 5, status: 'completed' });
+
+  const popularVideos = videosData?.videos || [];
 
   return (
     <PageContainer>
@@ -189,24 +193,32 @@ export default function HomePage() {
             </SectionLink>
           </SectionHeader>
           <MovieScroll>
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/1")}
-            />
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/2")}
-            />
-            <MovieFilmCard
-              imageSrc="/images/movie1.jpg"
-              author="농약 두봉지"
-              title="레전드 부산소마고의 영화"
-              onClick={() => navigate("/video/view/3")}
-            />
+            {popularVideos.length > 0 ? (
+              popularVideos.map((video) => (
+                <MovieFilmCard
+                  key={video.id}
+                  imageSrc={video.thumbnail || "/images/movie1.jpg"}
+                  author="localhost"
+                  title={video.title}
+                  onClick={() => navigate(`/video/view/${video.id}`)}
+                />
+              ))
+            ) : (
+              <>
+                <MovieFilmCard
+                  imageSrc="/images/movie1.jpg"
+                  author="농약 두봉지"
+                  title="레전드 부산소마고의 영화"
+                  onClick={() => navigate("/video/view/1")}
+                />
+                <MovieFilmCard
+                  imageSrc="/images/movie1.jpg"
+                  author="농약 두봉지"
+                  title="레전드 부산소마고의 영화"
+                  onClick={() => navigate("/video/view/2")}
+                />
+              </>
+            )}
           </MovieScroll>
         </PopularSection>
       </Main>

@@ -2,8 +2,9 @@ import styled from "@emotion/styled";
 import { theme } from "@/shared/styles/theme";
 import { H4, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import { useVideo } from "@/features/videos/hooks";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.base.black};
@@ -140,16 +141,47 @@ const VideoTitle = styled(P2)`
 
 export default function VideoViewPage() {
   const navigate = useNavigate();
+  const { videoId } = useParams<{ videoId: string }>();
+  const { data: video, isLoading, error } = useVideo(videoId || "");
   const [isLiked, setIsLiked] = useState(false);
 
   const handleLikeToggle = () => {
     setIsLiked(!isLiked);
   };
 
+  const formatCount = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <ContentOverlay style={{ justifyContent: "center", alignItems: "center" }}>
+          <P2 style={{ color: "white" }}>로딩 중...</P2>
+        </ContentOverlay>
+        <Navbar />
+      </PageContainer>
+    );
+  }
+
+  if (error || !video) {
+    return (
+      <PageContainer>
+        <ContentOverlay style={{ justifyContent: "center", alignItems: "center" }}>
+          <P2 style={{ color: "white" }}>영상을 불러올 수 없습니다.</P2>
+        </ContentOverlay>
+        <Navbar />
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
       <VideoBackground>
-        <img src="/images/video-background.jpg" alt="Video" />
+        <img src={video.thumbnail || "/images/video-background.jpg"} alt={video.title} />
       </VideoBackground>
       <GradientOverlay />
 
@@ -167,11 +199,11 @@ export default function VideoViewPage() {
                 src={isLiked ? "/images/heart_fill.svg" : "/images/heart.svg"}
                 alt="좋아요"
               />
-              <ActionCount>999</ActionCount>
+              <ActionCount>{formatCount(video.like_count)}</ActionCount>
             </ActionButton>
             <ActionButton>
               <ActionIcon src="/images/comment.svg" alt="댓글" />
-              <ActionCount>999</ActionCount>
+              <ActionCount>{formatCount(video.view_count)}</ActionCount>
             </ActionButton>
             <ActionButton>
               <ActionIcon src="/images/download.svg" alt="다운로드" />
@@ -179,8 +211,8 @@ export default function VideoViewPage() {
           </RightActions>
 
           <VideoInfo>
-            <CreatorName>농약 두봉지</CreatorName>
-            <VideoTitle>레전드 부산소마고의 영화</VideoTitle>
+            <CreatorName>{video.title}</CreatorName>
+            <VideoTitle>{video.description || "여행의 추억을 담은 영상"}</VideoTitle>
           </VideoInfo>
         </MainContent>
       </ContentOverlay>

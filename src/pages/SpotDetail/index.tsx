@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import styled from '@emotion/styled'
-import { spotsApi } from '@/features/spots/api'
-import type { Spot } from '@/features/spots/types'
+import { useSpot } from '@/features/spots/hooks'
 import { H2, H4, P2, P3 } from '@/shared/components/Typography'
 import { useGeolocation } from '@/shared/hooks/useGeolocation'
 import { calculateDistance } from '@/shared/utils/distance'
@@ -70,8 +68,11 @@ const Distance = styled(P3)`
   font-weight: 600;
 `
 
-const VisitCount = styled(P3)`
+const Category = styled(P3)`
   margin: 0;
+  padding: 4px 8px;
+  background: ${({ theme }) => theme.colors.gray[200]};
+  border-radius: 4px;
 `
 
 const Section = styled.div`
@@ -88,30 +89,18 @@ const Description = styled(P2)`
   color: ${({ theme }) => theme.colors.text.primary};
 `
 
-const MemoryOrbsContainer = styled.div`
+const TagsContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.sm};
   flex-wrap: wrap;
 `
 
-const MemoryOrb = styled.div`
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  cursor: pointer;
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.05);
-  }
+const Tag = styled.span`
+  padding: 6px 12px;
+  background: ${({ theme }) => theme.colors.gray[100]};
+  border-radius: 16px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `
 
 const ActionButton = styled.button`
@@ -148,34 +137,14 @@ export default function SpotDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { position } = useGeolocation()
-  const [spot, setSpot] = useState<Spot | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [visitCount, setVisitCount] = useState(0)
 
-  useEffect(() => {
-    const loadSpotDetail = async () => {
-      if (!id) return
+  const { data: spot, isLoading, error } = useSpot(id || '')
 
-      try {
-        setLoading(true)
-        const data = await spotsApi.getById(id)
-        setSpot(data)
-        setVisitCount(Math.floor(Math.random() * 100))
-      } catch (error) {
-        console.error('Spot 상세 로드 실패:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSpotDetail()
-  }, [id])
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingContainer>로딩 중...</LoadingContainer>
   }
 
-  if (!spot) {
+  if (error || !spot) {
     return <LoadingContainer>명소를 찾을 수 없습니다.</LoadingContainer>
   }
 
@@ -183,16 +152,18 @@ export default function SpotDetailPage() {
     ? calculateDistance(
         position.coords.latitude,
         position.coords.longitude,
-        spot.lat,
-        spot.lng
+        spot.location.lat,
+        spot.location.lng
       )
     : undefined
+
+  const mainImage = spot.images?.[0] || '/images/placeholder-spot.png'
 
   return (
     <Container>
       <Header>
         <HeaderImage
-          src={spot.image_url || '/images/placeholder-spot.png'}
+          src={mainImage}
           alt={spot.name}
           onError={(e) => {
             e.currentTarget.src = '/images/placeholder-spot.png'
@@ -210,25 +181,37 @@ export default function SpotDetailPage() {
                 {distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}
               </Distance>
             )}
-            <VisitCount>방문 {visitCount}회</VisitCount>
+            <Category>{spot.category}</Category>
           </MetaInfo>
         </TitleSection>
 
         <Section>
           <SectionTitle>설명</SectionTitle>
-          <Description>{spot.description || '설명이 없습니다.'}</Description>
+          <Description>
+            {spot.detailed_description || spot.description || '설명이 없습니다.'}
+          </Description>
         </Section>
 
-        <Section>
-          <SectionTitle>기억 구슬</SectionTitle>
-          <MemoryOrbsContainer>
-            {[...Array(Math.min(visitCount, 10))].map((_, index) => (
-              <MemoryOrb key={index}>
-                {index + 1}
-              </MemoryOrb>
-            ))}
-          </MemoryOrbsContainer>
-        </Section>
+        {spot.tags && spot.tags.length > 0 && (
+          <Section>
+            <SectionTitle>태그</SectionTitle>
+            <TagsContainer>
+              {spot.tags.map((tag, index) => (
+                <Tag key={index}>{tag}</Tag>
+              ))}
+            </TagsContainer>
+          </Section>
+        )}
+
+        {spot.operating_hours && (
+          <Section>
+            <SectionTitle>운영 시간</SectionTitle>
+            <Description>
+              평일: {spot.operating_hours.weekdays}<br />
+              주말: {spot.operating_hours.weekends}
+            </Description>
+          </Section>
+        )}
 
         <ActionButton onClick={() => navigate('/capture')}>
           📸 방문 인증하기

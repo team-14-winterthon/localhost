@@ -2,12 +2,14 @@ import styled from '@emotion/styled';
 import { useState } from 'react';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
 import { H2, P2 } from '@/shared/components/Typography';
 import { safeAreaPatterns } from '@/shared/styles/safeArea';
 import Navbar from '@/shared/components/Navbar';
+import { useUploadMedia } from '@/features/media/hooks';
+import { Geolocation } from '@capacitor/geolocation';
 
 const Container = styled.div`
   position: relative;
@@ -203,12 +205,27 @@ interface CapturePageProps {
   showError?: boolean;
 }
 
+interface LocationState {
+  spotId?: string;
+  spotName?: string;
+  verificationId?: string;
+}
+
 export default function CapturePage({ showError = false }: CapturePageProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { spotId: paramSpotId } = useParams<{ spotId: string }>();
+
+  const locationState = location.state as LocationState | null;
+  const spotId = paramSpotId || locationState?.spotId || '';
+  const spotName = locationState?.spotName || '';
+  const verificationId = locationState?.verificationId || '';
+
+  const uploadMedia = useUploadMedia();
 
   const [photo, setPhoto] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [memo, setMemo] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [uploadError, setUploadError] = useState(showError);
 
   const handleBack = () => {
@@ -225,6 +242,16 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
 
       if (image.webPath) {
         setPhoto(image.webPath);
+
+        // Convert webPath to File for upload
+        try {
+          const response = await fetch(image.webPath);
+          const blob = await response.blob();
+          const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+          setPhotoFile(file);
+        } catch (err) {
+          console.error('Failed to convert image to file:', err);
+        }
       }
     } catch (error) {
       console.error('Camera error:', error);
@@ -253,6 +280,7 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
         openCamera();
       } else if (result.index === 1) {
         setPhoto(null);
+        setPhotoFile(null);
       }
     } else {
       openCamera();
@@ -260,31 +288,56 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
   };
 
   const handleSubmit = async () => {
-    if (!photo) {
+    if (!photo || !photoFile) {
       toast.error('사진을 선택해주세요');
       return;
     }
 
+    if (!spotId) {
+      toast.error('스팟 정보가 없습니다');
+      return;
+    }
+
     try {
-      setIsLoading(true);
       setUploadError(false);
 
-      // TODO: Implement photo upload API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get current location
+      let currentLocation = { lat: 0, lng: 0 };
+      try {
+        const position = await Geolocation.getCurrentPosition();
+        currentLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+      } catch (locError) {
+        console.warn('Failed to get location:', locError);
+      }
+
+      const result = await uploadMedia.mutateAsync({
+        file: photoFile,
+        spot_id: spotId,
+        user_memo: memo || undefined,
+        location: currentLocation,
+        verification_id: verificationId,
+      });
 
       // On success, navigate to success page
       navigate('/capture/success', {
         state: {
+          mediaId: result.id,
           tags: ['맑음', '먹거리', '야간'],
-          location: '자갈치 시장',
-          date: '2025년 12월 30일'
+          location: spotName || '장소',
+          date: new Date().toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
         }
       });
     } catch (error) {
       console.error('Photo upload error:', error);
       setUploadError(true);
-    } finally {
-      setIsLoading(false);
+      toast.error('업로드에 실패했습니다');
     }
   };
 
@@ -327,8 +380,8 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
       </FormContainer>
 
       <BottomSection>
-        <SubmitButton onClick={handleSubmit} disabled={!photo || isLoading}>
-          {isLoading ? '업로드 중...' : '다음으로'}
+        <SubmitButton onClick={handleSubmit} disabled={!photo || uploadMedia.isPending}>
+          {uploadMedia.isPending ? '업로드 중...' : '다음으로'}
         </SubmitButton>
       </BottomSection>
 

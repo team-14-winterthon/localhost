@@ -4,6 +4,7 @@ import { H2, H4, P3, P4 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useVideos } from "@/features/videos/hooks";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.gray[100]};
@@ -110,6 +111,11 @@ const MovieCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.9;
+  }
 `;
 
 const FilmStrip = styled.div`
@@ -194,6 +200,18 @@ const FloatingButton = styled.button`
   }
 `;
 
+const LoadingMessage = styled(P3)`
+  text-align: center;
+  color: ${theme.colors.gray[600]};
+  padding: 40px;
+`;
+
+const EmptyMessage = styled(P3)`
+  text-align: center;
+  color: ${theme.colors.gray[600]};
+  padding: 40px;
+`;
+
 interface MovieListPageProps {
   type?: "my" | "popular";
 }
@@ -202,14 +220,13 @@ export default function MovieListPage({ type = "my" }: MovieListPageProps) {
   const navigate = useNavigate();
   const [sortOrder] = useState("기본순");
 
-  const popularMovies = [
-    { id: "1", subtitle: "농약 두봉지", title: "레전드 부산소마고의 영화" },
-    { id: "2", subtitle: "농약 두봉지", title: "부산의 추억" },
-    { id: "3", subtitle: "농약 두봉지", title: "해운대 이야기" },
-    { id: "4", subtitle: "농약 두봉지", title: "광안리 밤바다" },
-  ];
+  const { data, isLoading, error } = useVideos({
+    status: "completed",
+    limit: 20,
+  });
 
   const pageTitle = type === "my" ? "내가 만든 영화" : "인기 영화관";
+  const videos = data?.videos || [];
 
   return (
     <PageContainer>
@@ -231,32 +248,48 @@ export default function MovieListPage({ type = "my" }: MovieListPageProps) {
           </SortDropdown>
         </TitleBar>
 
-        <MovieGrid>
-          {popularMovies.map((movie) => (
-            <MovieCard key={movie.id}>
-              <FilmStrip>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <FilmHole key={`top-hole-${i}`} />
-                ))}
-              </FilmStrip>
-              <MovieImage>
-                <img
-                  src="/images/placeholder-movie.jpg"
-                  alt={movie.title}
-                />
-                <MovieInfo>
-                  <MovieSubtitle>{movie.subtitle}</MovieSubtitle>
-                  <MovieTitle>{movie.title}</MovieTitle>
-                </MovieInfo>
-              </MovieImage>
-              <FilmStrip>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <FilmHole key={`bottom-hole-${i}`} />
-                ))}
-              </FilmStrip>
-            </MovieCard>
-          ))}
-        </MovieGrid>
+        {isLoading ? (
+          <LoadingMessage>로딩 중...</LoadingMessage>
+        ) : error ? (
+          <EmptyMessage>영상을 불러오는데 실패했습니다.</EmptyMessage>
+        ) : videos.length === 0 ? (
+          <EmptyMessage>아직 만든 영화가 없습니다.</EmptyMessage>
+        ) : (
+          <MovieGrid>
+            {videos.map((video) => (
+              <MovieCard
+                key={video.id}
+                onClick={() => navigate(`/video/view/${video.id}`)}
+              >
+                <FilmStrip>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <FilmHole key={`top-hole-${i}`} />
+                  ))}
+                </FilmStrip>
+                <MovieImage>
+                  <img
+                    src={video.thumbnail || "/images/placeholder-movie.jpg"}
+                    alt={video.title}
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/placeholder-movie.jpg";
+                    }}
+                  />
+                  <MovieInfo>
+                    <MovieSubtitle>
+                      {Math.floor(video.duration / 60)}분 {Math.floor(video.duration % 60)}초
+                    </MovieSubtitle>
+                    <MovieTitle>{video.title}</MovieTitle>
+                  </MovieInfo>
+                </MovieImage>
+                <FilmStrip>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <FilmHole key={`bottom-hole-${i}`} />
+                  ))}
+                </FilmStrip>
+              </MovieCard>
+            ))}
+          </MovieGrid>
+        )}
       </Content>
 
       <FloatingButton onClick={() => navigate("/movie/create")}>

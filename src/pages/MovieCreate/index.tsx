@@ -6,6 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import DateRangePicker from "@/shared/components/DateRangePicker";
 import ClapperBoard from "@/shared/components/ClapperBoard";
+import { useCreateVideo } from "@/features/videos/hooks";
+import { useCurrentUser } from "@/features/users/hooks";
+import toast from "react-hot-toast";
+import type { VideoGenre } from "@/features/videos/types";
 
 type Value = Date | null | [Date | null, Date | null];
 
@@ -187,8 +191,18 @@ const FixedButtonContainer = styled.div`
   max-width: 335px;
 `;
 
+// 분위기 -> VideoGenre 매핑
+const moodToGenre: Record<string, VideoGenre> = {
+  코미디: "highlight",
+  브이로그: "travel_vlog",
+  다큐멘터리: "documentary",
+};
+
 export default function MovieCreatePage() {
   const navigate = useNavigate();
+  const { data: user } = useCurrentUser();
+  const createVideo = useCreateVideo();
+
   const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<Value>(null);
@@ -200,6 +214,11 @@ export default function MovieCreatePage() {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}.${month}.${day}`;
+  };
+
+  const formatDateISO = (date: Date | null) => {
+    if (!date) return undefined;
+    return date.toISOString();
   };
 
   const getDateRangeText = () => {
@@ -224,7 +243,6 @@ export default function MovieCreatePage() {
   const handleDateChange = (value: Value) => {
     setDateRange(value);
 
-    // 날짜 범위가 완전히 선택되면 바텀시트 닫기
     if (Array.isArray(value) && value[0] && value[1]) {
       setTimeout(() => setIsCalendarOpen(false), 300);
     }
@@ -233,11 +251,45 @@ export default function MovieCreatePage() {
   const places = ["부산", "제주", "서울"];
   const moods = ["코미디", "브이로그", "다큐멘터리"];
 
-  const isFormValid = selectedPlace && selectedMood;
+  const isFormValid = selectedPlace && selectedMood && dateRange;
 
-  const handleSubmit = () => {
-    if (isFormValid) {
-      navigate("/movie/result");
+  const handleSubmit = async () => {
+    if (!isFormValid || !selectedMood) return;
+
+    const [dateFrom, dateTo] = Array.isArray(dateRange)
+      ? dateRange
+      : [dateRange, dateRange];
+
+    try {
+      const result = await createVideo.mutateAsync({
+        title: `${selectedPlace} 여행 영상`,
+        selection_criteria: {
+          date_from: formatDateISO(dateFrom),
+          date_to: formatDateISO(dateTo),
+          auto_select: true,
+          max_photos: 15,
+        },
+        style_preferences: {
+          genre: moodToGenre[selectedMood] || "travel_vlog",
+          music_style: "upbeat",
+          editing_style: "smooth",
+          duration: "short",
+          include_voice_memos: true,
+          language: "ko",
+        },
+      });
+
+      navigate("/movie/result", {
+        state: {
+          generationId: result.video_generation_id,
+          place: selectedPlace,
+          mood: selectedMood,
+          director: user?.nickname || "익명",
+        },
+      });
+    } catch (error) {
+      console.error("영상 생성 실패:", error);
+      toast.error("영상 생성에 실패했습니다.");
     }
   };
 
@@ -259,9 +311,13 @@ export default function MovieCreatePage() {
           scene="001"
           place={selectedPlace}
           roll={null}
-          director="농약두봉지"
+          director={user?.nickname || "농약두봉지"}
           mood={selectedMood}
-          date="2025.12.30"
+          date={new Date().toLocaleDateString("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).replace(/\. /g, ".").replace(".", "")}
         />
 
         <FormSection>
@@ -314,14 +370,18 @@ export default function MovieCreatePage() {
       </Content>
 
       <FixedButtonContainer>
-        <SubmitButton disabled={!isFormValid} onClick={handleSubmit}>
-          <SubmitButtonText>다음으로</SubmitButtonText>
+        <SubmitButton
+          disabled={!isFormValid || createVideo.isPending}
+          onClick={handleSubmit}
+        >
+          <SubmitButtonText>
+            {createVideo.isPending ? "생성 중..." : "다음으로"}
+          </SubmitButtonText>
         </SubmitButton>
       </FixedButtonContainer>
 
       <Navbar />
 
-      {/* 캘린더 바텀시트 */}
       <DateRangePicker
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
