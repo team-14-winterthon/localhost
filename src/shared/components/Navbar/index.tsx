@@ -38,7 +38,7 @@ const NavItem = styled.button<{ active?: boolean }>`
   }
 `;
 
-const NavText = styled(P1)<{ active?: boolean }>`
+const NavText = styled(P1) <{ active?: boolean }>`
   color: ${props => props.active ? theme.colors.primary[500] : theme.colors.gray[800]};
   text-align: center;
 `;
