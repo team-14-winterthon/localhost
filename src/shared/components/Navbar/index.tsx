@@ -51,7 +51,7 @@ export default function Navbar() {
     { path: '/map', icon: '/images/pin-alt.svg', label: '지도' },
     { path: '/video', icon: '/images/video-icon.svg', label: '영화' },
     { path: '/home', icon: '/images/home-icon.svg', label: '홈' },
-    { path: '/profile', icon: '/images/user-alt.svg', label: '마이' },
+    { path: '/mypage', icon: '/images/user-alt.svg', label: '마이' },
   ];
 
   return (

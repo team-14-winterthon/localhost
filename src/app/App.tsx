@@ -17,6 +17,7 @@ import MovieListPage from '@/pages/MovieList'
 import MovieCreatePage from '@/pages/MovieCreate'
 import MovieResultPage from '@/pages/MovieResult'
 import VideoViewPage from '@/pages/VideoView'
+import MyPage from '@/pages/MyPage'
 import './App.css'
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route path="/video/view/:id" element={<VideoViewPage />} />
         <Route path="/movie/create" element={<MovieCreatePage />} />
         <Route path="/movie/result" element={<MovieResultPage />} />
+        <Route path="/mypage" element={<MyPage />} />
       </Routes>
       <Toaster position="top-center" />
     </ThemeProvider>
