@@ -282,7 +282,7 @@ export default function MapPage() {
   // 현재 위치 기준 중심 좌표
   const center = position
     ? { lat: position.coords.latitude, lng: position.coords.longitude }
-    : { lat: 37.5665, lng: 126.978 }; // 서울 기본
+    : { lat: 35.0967, lng: 129.0303 }; // 부산 자갈치시장 기본
 
   // 마커 생성
   const markers: MapMarker[] = [
