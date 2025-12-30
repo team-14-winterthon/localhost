@@ -478,7 +478,12 @@ export default function MapPage() {
                     onClick={() => handleMemoryClick(memory.id)}
                     style={{ cursor: "pointer" }}
                   >
-                    <MemoryImage src={memory.url} />
+                    <MemoryImage
+                      src={
+                        memory.url ||
+                        "https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=300&fit=crop"
+                      }
+                    />
                     <MemoryGradient />
                     <MemoryOverlay>{memory.description}</MemoryOverlay>
                   </MemoryOrbItem>

@@ -140,7 +140,7 @@ export default function MemoryDetailPage() {
   const memory = {
     id: id,
     title: "이게 부산이지 ㅋㅋ",
-    imageUrl: "https://placekitten.com/400/500",
+    imageUrl: "https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=500&fit=crop",
     tags: ["맑음", "먹거리", "야간"],
     location: "자갈치 시장",
     date: "2025년 12월 30일",
