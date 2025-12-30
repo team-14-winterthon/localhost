@@ -3,6 +3,8 @@ export interface Place {
   name: string
   latitude: number
   longitude: number
+  image_url?: string
+  description?: string
 }
 
 export interface Memory {
