@@ -82,14 +82,16 @@ const Distance = styled(P3)`
   font-weight: 400;
 `
 
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1598981457915-aea220950616?w=200&h=200&fit=crop'
+
 export default function SpotCard({ spot, distance, onClick }: SpotCardProps) {
   return (
     <Card onClick={onClick}>
       <Image
-        src={spot.image_url || '/images/placeholder-spot.png'}
+        src={spot.image_url || PLACEHOLDER_IMAGE}
         alt={spot.name}
         onError={(e) => {
-          e.currentTarget.src = '/images/placeholder-spot.png'
+          e.currentTarget.src = PLACEHOLDER_IMAGE
         }}
       />
       <Info>
