@@ -4,8 +4,8 @@ import { H3, P1 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import FilmStrip from "@/shared/components/FilmStrip";
 import MovieFilmCard from "@/shared/components/MovieFilmCard";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMyMovies } from "@/shared/hooks";
 
 const PageContainer = styled.div`
   background-color: ${theme.colors.gray[100]};
@@ -152,16 +152,10 @@ const FloatingButton = styled.button`
   }
 `;
 
-interface Movie {
-  id: string;
-  title: string;
-  thumbnail: string;
-}
-
 export default function MoviePage() {
   const navigate = useNavigate();
-  // 영화 데이터 상태 관리 (빈 배열로 초기화하여 빈 상태 표시)
-  const [myMovies] = useState<Movie[]>([]);
+  // React Query로 영화 목록 조회
+  const { data: myMovies = [], isLoading } = useMyMovies();
 
   return (
     <PageContainer>
@@ -179,18 +173,26 @@ export default function MoviePage() {
             )}
           </SectionHeader>
 
-          {myMovies.length === 0 ? (
+          {isLoading ? (
+            <EmptyState>
+              <EmptyMessage>로딩 중...</EmptyMessage>
+            </EmptyState>
+          ) : myMovies.length === 0 ? (
             <EmptyState>
               <EmptyMessage>아직 만든 영화가 없어요!</EmptyMessage>
             </EmptyState>
           ) : (
             <MovieListContainer>
               {myMovies.map((movie) => (
-                <MyMovieCard key={movie.id}>
+                <MyMovieCard
+                  key={movie.id}
+                  onClick={() => navigate(`/video/view/${movie.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
                   <FilmStrip />
                   <MovieImage>
                     <img
-                      src={movie.thumbnail}
+                      src={movie.thumbnailUrl || "/images/placeholder-movie.jpg"}
                       alt={movie.title}
                     />
                   </MovieImage>
@@ -210,17 +212,13 @@ export default function MoviePage() {
             </MoreLink>
           </SectionHeader>
           <MovieListContainer>
-            {[
-              { subtitle: "농약 두봉지", title: "레전드 부산소마고의 영화" },
-              { subtitle: "농약 두봉지", title: "부산의 추억" },
-              { subtitle: "농약 두봉지", title: "해운대 이야기" },
-            ].map((movie, index) => (
+            {myMovies.slice(0, 3).map((movie) => (
               <MovieFilmCard
-                key={`popular-movie-${index}`}
-                imageSrc="/images/placeholder-movie.jpg"
-                author={movie.subtitle}
+                key={`popular-${movie.id}`}
+                imageSrc={movie.thumbnailUrl || "/images/placeholder-movie.jpg"}
+                author={movie.dong}
                 title={movie.title}
-                onClick={() => navigate(`/video/view/${index + 1}`)}
+                onClick={() => navigate(`/video/view/${movie.id}`)}
               />
             ))}
           </MovieListContainer>

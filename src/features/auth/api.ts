@@ -7,6 +7,12 @@ export const authApi = {
    * POST /auth/google -> Google Link로 이동
    */
   async redirectToGoogle(): Promise<void> {
+    // 목 환경에서는 바로 콜백으로 이동
+    if (import.meta.env.VITE_ENABLE_MOCKING === 'true') {
+      window.location.href = '/#/auth/callback?code=mock-auth-code'
+      return
+    }
+
     const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
     window.location.href = `${baseUrl}/auth/google`
   },
