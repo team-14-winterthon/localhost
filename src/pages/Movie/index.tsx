@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
 import { theme } from "@/shared/styles/theme";
-import { H3, H4, P1, P4 } from "@/shared/components/Typography";
+import { H3, P1 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
+import FilmStrip from "@/shared/components/FilmStrip";
+import MovieFilmCard from "@/shared/components/MovieFilmCard";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -89,20 +91,6 @@ const MyMovieCard = styled.div`
   gap: 8px;
 `;
 
-const FilmStrip = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-`;
-
-const FilmHole = styled.div`
-  background-color: white;
-  width: 18px;
-  height: 12px;
-  flex-shrink: 0;
-`;
-
 const MovieImage = styled.div`
   width: 100%;
   height: 100px;
@@ -125,67 +113,6 @@ const MovieImage = styled.div`
       rgba(0, 0, 0, 0.08)
     );
   }
-`;
-
-const PopularMovieCard = styled.div`
-  background-color: ${theme.colors.gray[800]};
-  overflow: hidden;
-  padding: 10px;
-  min-width: 170px;
-  width: 170px;
-  height: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
-`;
-
-const PopularMovieImage = styled.div`
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  min-height: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    inset: 0;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.1),
-      rgba(0, 0, 0, 0.4)
-    );
-    z-index: 1;
-  }
-`;
-
-const MovieInfo = styled.div`
-  position: absolute;
-  bottom: 4px;
-  left: 4px;
-  right: 4px;
-  color: white;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`;
-
-const MovieSubtitle = styled(P4)`
-  color: white;
-  margin-bottom: 2px;
-`;
-
-const MovieTitle = styled(H4)`
-  color: white;
 `;
 
 const EmptyState = styled.div`
@@ -257,22 +184,14 @@ export default function MoviePage() {
             <MovieListContainer>
               {myMovies.map((movie) => (
                 <MyMovieCard key={movie.id}>
-                  <FilmStrip>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <FilmHole key={`top-hole-${i}`} />
-                    ))}
-                  </FilmStrip>
+                  <FilmStrip />
                   <MovieImage>
                     <img
                       src={movie.thumbnail}
                       alt={movie.title}
                     />
                   </MovieImage>
-                  <FilmStrip>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <FilmHole key={`bottom-hole-${i}`} />
-                    ))}
-                  </FilmStrip>
+                  <FilmStrip />
                 </MyMovieCard>
               ))}
             </MovieListContainer>
@@ -293,25 +212,13 @@ export default function MoviePage() {
               { subtitle: "농약 두봉지", title: "부산의 추억" },
               { subtitle: "농약 두봉지", title: "해운대 이야기" },
             ].map((movie, index) => (
-              <PopularMovieCard key={`popular-movie-${index}`}>
-                <FilmStrip>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <FilmHole key={`top-hole-${i}`} />
-                  ))}
-                </FilmStrip>
-                <PopularMovieImage>
-                  <img src="/images/placeholder-movie.jpg" alt={movie.title} />
-                  <MovieInfo>
-                    <MovieSubtitle>{movie.subtitle}</MovieSubtitle>
-                    <MovieTitle>{movie.title}</MovieTitle>
-                  </MovieInfo>
-                </PopularMovieImage>
-                <FilmStrip>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <FilmHole key={`bottom-hole-${i}`} />
-                  ))}
-                </FilmStrip>
-              </PopularMovieCard>
+              <MovieFilmCard
+                key={`popular-movie-${index}`}
+                imageSrc="/images/placeholder-movie.jpg"
+                author={movie.subtitle}
+                title={movie.title}
+                onClick={() => navigate(`/video/view/${index + 1}`)}
+              />
             ))}
           </MovieListContainer>
         </Section>
