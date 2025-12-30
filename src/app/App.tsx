@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from '@emotion/react'
 import { Toaster } from 'react-hot-toast'
+import { theme } from '@/shared/styles/theme'
 import HomePage from '@/pages/Home'
 import LoginPage from '@/pages/Login'
 import SpotDetailPage from '@/pages/SpotDetail'
@@ -10,7 +12,7 @@ import './App.css'
 
 function App() {
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -20,7 +22,7 @@ function App() {
         <Route path="/video/result/:id" element={<VideoResultPage />} />
       </Routes>
       <Toaster position="top-center" />
-    </>
+    </ThemeProvider>
   )
 }
 
