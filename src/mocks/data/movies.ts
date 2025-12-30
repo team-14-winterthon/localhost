@@ -11,7 +11,7 @@ const SAMPLE_VIDEO = 'https://www.w3schools.com/html/mov_bbb.mp4'
 
 export const mockMovies: Movie[] = [
   {
-    id: 'movie-1',
+    id: '1',
     title: '자갈치시장 먹방 브이로그',
     thumbnailUrl: IMAGES.jagalchi,
     videoUrl: SAMPLE_VIDEO,
@@ -21,7 +21,7 @@ export const mockMovies: Movie[] = [
     status: true,
   },
   {
-    id: 'movie-2',
+    id: '2',
     title: '해운대 여름 휴가',
     thumbnailUrl: IMAGES.haeundae,
     videoUrl: SAMPLE_VIDEO,
@@ -31,7 +31,7 @@ export const mockMovies: Movie[] = [
     status: true,
   },
   {
-    id: 'movie-3',
+    id: '3',
     title: '다대포 낙조의 추억',
     thumbnailUrl: IMAGES.dadaepo,
     videoUrl: SAMPLE_VIDEO,
@@ -41,7 +41,7 @@ export const mockMovies: Movie[] = [
     status: true,
   },
   {
-    id: 'movie-4',
+    id: '4',
     title: '부산 맛집 투어',
     thumbnailUrl: IMAGES.jagalchi,
     videoUrl: SAMPLE_VIDEO,
@@ -51,7 +51,7 @@ export const mockMovies: Movie[] = [
     status: true,
   },
   {
-    id: 'movie-5',
+    id: '5',
     title: '해운대 서핑 도전기',
     thumbnailUrl: IMAGES.haeundae,
     videoUrl: SAMPLE_VIDEO,
@@ -61,7 +61,7 @@ export const mockMovies: Movie[] = [
     status: true,
   },
   {
-    id: 'movie-6',
+    id: '6',
     title: '다대포 힐링 산책',
     thumbnailUrl: IMAGES.dadaepo,
     videoUrl: SAMPLE_VIDEO,
@@ -73,43 +73,43 @@ export const mockMovies: Movie[] = [
 ]
 
 export const mockMovieDetails: Record<string, MovieDetail> = {
-  'movie-1': {
-    id: 'movie-1',
+  '1': {
+    id: '1',
     title: '자갈치시장 먹방 브이로그',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
     duration: 180,
   },
-  'movie-2': {
-    id: 'movie-2',
+  '2': {
+    id: '2',
     title: '해운대 여름 휴가',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
     duration: 240,
   },
-  'movie-3': {
-    id: 'movie-3',
+  '3': {
+    id: '3',
     title: '다대포 낙조의 추억',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
     duration: 150,
   },
-  'movie-4': {
-    id: 'movie-4',
+  '4': {
+    id: '4',
     title: '부산 맛집 투어',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
     duration: 200,
   },
-  'movie-5': {
-    id: 'movie-5',
+  '5': {
+    id: '5',
     title: '해운대 서핑 도전기',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
     duration: 165,
   },
-  'movie-6': {
-    id: 'movie-6',
+  '6': {
+    id: '6',
     title: '다대포 힐링 산책',
     userId: 'user-1',
     videoUrl: SAMPLE_VIDEO,
@@ -121,7 +121,7 @@ export const mockMovieDetails: Record<string, MovieDetail> = {
 let movieIdCounter = 7
 
 export function createMockMovie(request: MovieCreateRequest): MovieCreateResponse {
-  const id = `movie-${movieIdCounter++}`
+  const id = String(movieIdCounter++)
   const now = new Date().toISOString()
 
   // 썸네일은 랜덤 부산 이미지 중 하나 사용
