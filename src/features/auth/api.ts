@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import { useAuthStore } from '@/shared/stores'
 
 export const authApi = {
   /**
@@ -24,9 +25,9 @@ export const authApi = {
   },
 
   /**
-   * 로그아웃 (로컬 토큰 삭제)
+   * 로그아웃 (Zustand store 초기화)
    */
-  async signOut(): Promise<void> {
-    localStorage.removeItem('authToken')
+  signOut(): void {
+    useAuthStore.getState().logout()
   },
 }
