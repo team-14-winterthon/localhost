@@ -38,7 +38,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 40px;
-  padding: 0 20px;
+  padding: 0 20px 120px;
   width: 100%;
   align-items: center;
 `;
@@ -181,15 +181,6 @@ const SubmitButton = styled.button<{ disabled?: boolean }>`
 const SubmitButtonText = styled(P1)`
   color: ${theme.colors.gray[100]};
   text-align: center;
-`;
-
-const FixedButtonContainer = styled.div`
-  position: fixed;
-  bottom: 140px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 335px;
 `;
 
 export default function MovieCreatePage() {
@@ -352,13 +343,11 @@ export default function MovieCreatePage() {
             </DateInput>
           </FormField>
         </FormSection>
-      </Content>
 
-      <FixedButtonContainer>
         <SubmitButton disabled={!isFormValid || isLoading} onClick={handleSubmit}>
           <SubmitButtonText>{isLoading ? "생성 중..." : "다음으로"}</SubmitButtonText>
         </SubmitButton>
-      </FixedButtonContainer>
+      </Content>
 
       <Navbar />
 

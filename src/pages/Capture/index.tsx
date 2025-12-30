@@ -79,8 +79,8 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 44px;
-  padding: 40px 20px 0;
+  gap: 24px;
+  padding: 40px 20px 120px;
   flex: 1;
   width: 100%;
 `;
@@ -158,14 +158,6 @@ const ErrorMessage = styled(P2)`
   width: 100%;
 `;
 
-const BottomSection = styled.div`
-  position: fixed;
-  bottom: 113px;
-  left: 0;
-  right: 0;
-  padding: 0 20px;
-`;
-
 const SubmitButton = styled.button`
   width: 100%;
   max-width: 335px;
@@ -179,8 +171,6 @@ const SubmitButton = styled.button`
   font-family: ${theme.typography.p1.fontFamily};
   font-size: ${theme.typography.p1.fontSize};
   font-weight: ${theme.typography.p1.fontWeight};
-  display: block;
-  margin: 0 auto;
 
   &:disabled {
     background-color: ${theme.colors.gray[500]};
@@ -341,13 +331,11 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
         {uploadError && (
           <ErrorMessage>업로드에 실패했습니다. 다시 시도해주세요.</ErrorMessage>
         )}
-      </FormContainer>
 
-      <BottomSection>
         <SubmitButton onClick={handleSubmit} disabled={!photo || isLoading}>
           {isLoading ? '업로드 중...' : '다음으로'}
         </SubmitButton>
-      </BottomSection>
+      </FormContainer>
 
 
 
