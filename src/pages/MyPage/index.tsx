@@ -4,6 +4,8 @@ import { H3, P2 } from "@/shared/components/Typography";
 import Navbar from "@/shared/components/Navbar";
 import MemoryCalendar from "@/shared/components/MemoryCalendar";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "@/features/auth/api";
 
 const PageContainer = styled.div`
   background-color: white;
@@ -118,8 +120,77 @@ const SettingsButton = styled.button`
   }
 `;
 
+const LogoutModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 280px;
+  text-align: center;
+`;
+
+const ModalTitle = styled(H3)`
+  color: ${theme.colors.base.black};
+  margin-bottom: 8px;
+`;
+
+const ModalDescription = styled(P2)`
+  color: ${theme.colors.gray[600]};
+  margin-bottom: 20px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const ModalButton = styled.button<{ variant?: "primary" | "secondary" }>`
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  ${({ variant }) =>
+    variant === "primary"
+      ? `
+    background: ${theme.colors.primary[500]};
+    color: white;
+  `
+      : `
+    background: ${theme.colors.gray[200]};
+    color: ${theme.colors.gray[700]};
+  `}
+
+  &:active {
+    opacity: 0.8;
+  }
+`;
+
 export default function MyPage() {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    authApi.signOut();
+    navigate("/");
+  };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
@@ -193,7 +264,7 @@ export default function MyPage() {
               </MemoryCount>
             </UserInfo>
           </UserProfileInfo>
-          <SettingsButton>
+          <SettingsButton onClick={() => setShowLogoutModal(true)}>
             <img src="/images/setting.svg" alt="설정" />
           </SettingsButton>
         </UserProfile>
@@ -208,6 +279,26 @@ export default function MyPage() {
       </Main>
 
       <Navbar />
+
+      {showLogoutModal && (
+        <LogoutModal onClick={() => setShowLogoutModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>로그아웃</ModalTitle>
+            <ModalDescription>정말 로그아웃 하시겠습니까?</ModalDescription>
+            <ModalButtons>
+              <ModalButton
+                variant="secondary"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                취소
+              </ModalButton>
+              <ModalButton variant="primary" onClick={handleLogout}>
+                로그아웃
+              </ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </LogoutModal>
+      )}
     </PageContainer>
   );
 }

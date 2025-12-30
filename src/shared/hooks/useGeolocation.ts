@@ -1,29 +1,48 @@
-import { useState, useEffect } from 'react'
-import { Geolocation } from '@capacitor/geolocation'
-import type { Position } from '@capacitor/geolocation'
+import { useState, useEffect } from 'react';
+
+interface GeolocationState {
+  position: GeolocationPosition | null;
+  error: string | null;
+  loading: boolean;
+}
 
 export function useGeolocation() {
-  const [position, setPosition] = useState<Position | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [state, setState] = useState<GeolocationState>({
+    position: null,
+    error: null,
+    loading: false,
+  });
 
   const getCurrentPosition = async () => {
-    setLoading(true)
-    setError(null)
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const position = await Geolocation.getCurrentPosition()
-      setPosition(position)
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        });
+      });
+      setState({ position: pos, error: null, loading: false });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get location')
-    } finally {
-      setLoading(false)
+      const geoError = err as GeolocationPositionError;
+      setState({
+        position: null,
+        error: geoError.message || 'Failed to get location',
+        loading: false,
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    getCurrentPosition()
-  }, [])
+    getCurrentPosition();
+  }, []);
 
-  return { position, error, loading, refetch: getCurrentPosition }
+  return {
+    position: state.position,
+    error: state.error,
+    loading: state.loading,
+    refetch: getCurrentPosition,
+  };
 }

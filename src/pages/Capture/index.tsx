@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
-import { Camera, CameraResultType } from '@capacitor/camera';
-import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { theme } from '@/shared/styles/theme';
 import { H2, P2 } from '@/shared/components/Typography';
 import { safeAreaPatterns } from '@/shared/styles/safeArea';
 import Navbar from '@/shared/components/Navbar';
+import { ActionSheet } from '@/shared/components/ActionSheet';
 import { authPhotosApi } from '@/features/media/api';
+import { useNativeBridge } from '@/shared/hooks/useNativeBridge';
+import { base64ToDataUrl, base64ToFile } from '@/shared/utils/nativeBridge';
 
 const Container = styled.div`
   position: relative;
@@ -197,66 +198,111 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const spotId = searchParams.get('spotId') || '';
+  const { openCamera, openGallery, isNativeApp } = useNativeBridge();
 
   const [photo, setPhoto] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadError, setUploadError] = useState(showError);
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [showSourceSheet, setShowSourceSheet] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const openCamera = async () => {
+  const handleCameraCapture = async () => {
     try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-      });
-
-      if (image.webPath) {
-        setPhoto(image.webPath);
-
-        // Convert webPath to File for upload
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
-        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setPhotoFile(file);
+      if (isNativeApp) {
+        // NativeBridge 방식
+        const result = await openCamera();
+        if (result?.success && result.data) {
+          const dataUrl = base64ToDataUrl(result.data.base64, result.data.mimeType);
+          setPhoto(dataUrl);
+          const file = base64ToFile(result.data.base64, result.data.mimeType, `photo_${Date.now()}.jpg`);
+          setPhotoFile(file);
+        } else if (result?.error) {
+          console.error('Camera error:', result.error);
+          toast.error('카메라를 열 수 없습니다');
+        }
+      } else {
+        // 브라우저 폴백 - input file 사용
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const dataUrl = await fileToDataUrl(file);
+            setPhoto(dataUrl);
+            setPhotoFile(file);
+          }
+        };
+        input.click();
       }
     } catch (error) {
       console.error('Camera error:', error);
+      toast.error('카메라를 열 수 없습니다');
     }
   };
 
-  const handlePhotoClick = async () => {
-    if (photo) {
-      const result = await ActionSheet.showActions({
-        options: [
-          {
-            title: '사진 수정하기',
-          },
-          {
-            title: '사진 삭제하기',
-            style: ActionSheetButtonStyle.Destructive,
-          },
-          {
-            title: '취소',
-            style: ActionSheetButtonStyle.Cancel,
-          },
-        ],
-      });
-
-      if (result.index === 0) {
-        openCamera();
-      } else if (result.index === 1) {
-        setPhoto(null);
-        setPhotoFile(null);
+  const handleGallerySelect = async () => {
+    try {
+      if (isNativeApp) {
+        // NativeBridge 방식
+        const result = await openGallery();
+        if (result?.success && result.data) {
+          const dataUrl = base64ToDataUrl(result.data.base64, result.data.mimeType);
+          setPhoto(dataUrl);
+          const file = base64ToFile(result.data.base64, result.data.mimeType, `photo_${Date.now()}.jpg`);
+          setPhotoFile(file);
+        } else if (result?.error) {
+          console.error('Gallery error:', result.error);
+          toast.error('갤러리를 열 수 없습니다');
+        }
+      } else {
+        // 브라우저 폴백 - input file 사용
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0];
+          if (file) {
+            const dataUrl = await fileToDataUrl(file);
+            setPhoto(dataUrl);
+            setPhotoFile(file);
+          }
+        };
+        input.click();
       }
-    } else {
-      openCamera();
+    } catch (error) {
+      console.error('Gallery error:', error);
+      toast.error('갤러리를 열 수 없습니다');
     }
+  };
+
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handlePhotoClick = () => {
+    if (photo) {
+      setShowActionSheet(true);
+    } else {
+      setShowSourceSheet(true);
+    }
+  };
+
+  const handleDeletePhoto = () => {
+    setPhoto(null);
+    setPhotoFile(null);
   };
 
   const handleSubmit = async () => {
@@ -337,7 +383,38 @@ export default function CapturePage({ showError = false }: CapturePageProps) {
         </SubmitButton>
       </FormContainer>
 
+      {/* 사진이 있을 때: 수정/삭제 ActionSheet */}
+      <ActionSheet
+        isOpen={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        options={[
+          {
+            title: '사진 수정하기',
+            onSelect: () => setShowSourceSheet(true),
+          },
+          {
+            title: '사진 삭제하기',
+            destructive: true,
+            onSelect: handleDeletePhoto,
+          },
+        ]}
+      />
 
+      {/* 사진 소스 선택: 카메라/갤러리 ActionSheet */}
+      <ActionSheet
+        isOpen={showSourceSheet}
+        onClose={() => setShowSourceSheet(false)}
+        options={[
+          {
+            title: '카메라로 촬영',
+            onSelect: handleCameraCapture,
+          },
+          {
+            title: '갤러리에서 선택',
+            onSelect: handleGallerySelect,
+          },
+        ]}
+      />
 
       <Navbar />
     </Container>

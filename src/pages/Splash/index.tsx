@@ -110,7 +110,41 @@ const ButtonText = styled(P1)`
 export default function SplashPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, isLoading: authLoading } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, setAuth } = useAuthStore();
+
+  // OAuth 콜백 처리 - 목 로그인 사용 중이므로 비활성화
+  // useEffect(() => {
+  //   const handleOAuthCallback = async () => {
+  //     const urlParams = new URLSearchParams(window.location.search);
+  //     const code = urlParams.get('code');
+  //     const error = urlParams.get('error');
+
+  //     if (error) {
+  //       toast.error('로그인에 실패했습니다');
+  //       window.history.replaceState({}, '', window.location.pathname);
+  //       return;
+  //     }
+
+  //     if (code) {
+  //       try {
+  //         setIsLoading(true);
+  //         const { access_token } = await authApi.login(code);
+  //         setAuth(access_token);
+  //         window.history.replaceState({}, '', window.location.pathname);
+  //         toast.success('로그인 되었습니다');
+  //         navigate('/home', { replace: true });
+  //       } catch (err) {
+  //         console.error('OAuth callback error:', err);
+  //         toast.error('로그인 처리 중 오류가 발생했습니다');
+  //         window.history.replaceState({}, '', window.location.pathname);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   };
+
+  //   handleOAuthCallback();
+  // }, [navigate, setAuth]);
 
   // 이미 로그인되어 있으면 홈으로 리다이렉트
   useEffect(() => {
@@ -123,8 +157,10 @@ export default function SplashPage() {
     try {
       setIsLoading(true);
 
-      // Redirect to Google OAuth (POST /auth/google)
-      await authApi.redirectToGoogle();
+      // 목 로그인: 바로 토큰 설정하고 홈으로 이동
+      setAuth('mock-access-token');
+      toast.success('로그인 되었습니다');
+      navigate('/home', { replace: true });
     } catch (error) {
       console.error('Google login error:', error);
       toast.error('로그인에 실패했습니다');
