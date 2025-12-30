@@ -386,12 +386,12 @@ export default function MapPage() {
 
       <BottomSheet
         minHeight={190}
-        maxHeight={window.innerHeight * 0.85}
+        maxHeight={window.innerHeight * 0.8}
         initialHeight={
           selectedMemory
-            ? window.innerHeight * 0.85
+            ? window.innerHeight * 0.8
             : selectedPlace
-            ? window.innerHeight * 0.6
+            ? window.innerHeight * 0.8
             : 190
         }
       >

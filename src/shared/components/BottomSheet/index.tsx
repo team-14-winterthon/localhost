@@ -22,17 +22,23 @@ const Container = styled.div`
   touch-action: none;
 `
 
+const DragHandleArea = styled.div`
+  padding: 20px 0;
+  cursor: grab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:active {
+    cursor: grabbing;
+  }
+`
+
 const DragHandle = styled.div`
   width: 81px;
   height: 3px;
   background: #D1D9E8;
   border-radius: 2.5px;
-  margin: 10px auto;
-  cursor: grab;
-
-  &:active {
-    cursor: grabbing;
-  }
 `
 
 const Content = styled.div`
@@ -48,7 +54,7 @@ const Content = styled.div`
 export default function BottomSheet({
   children,
   minHeight = 160,
-  maxHeight = window.innerHeight * 0.85,
+  maxHeight = window.innerHeight * 0.8,
   initialHeight = 160,
 }: BottomSheetProps) {
   const [height, setHeight] = useState(initialHeight)
@@ -74,18 +80,29 @@ export default function BottomSheet({
   const handleTouchEnd = () => {
     setIsDragging(false)
 
-    // 스냅 효과: minHeight나 maxHeight에 가까우면 스냅
-    const snapThreshold = 50
-    if (Math.abs(height - minHeight) < snapThreshold) {
+    // 30-40px 임계값: 조금만 드래그해도 상태 전환
+    const threshold = 35
+    const dragDistance = height - startHeight.current
+
+    // 작게보기 상태에서 위로 당기면 → 크게보기로 전환
+    if (startHeight.current <= minHeight + 10 && dragDistance >= threshold) {
+      setHeight(maxHeight)
+    }
+    // 크게보기 상태에서 아래로 당기면 → 작게보기로 전환
+    else if (startHeight.current >= maxHeight - 10 && dragDistance <= -threshold) {
       setHeight(minHeight)
-    } else if (Math.abs(height - maxHeight) < snapThreshold) {
+    }
+    // 임계값 미달이면 원래 상태로 복귀
+    else if (Math.abs(height - minHeight) < Math.abs(height - maxHeight)) {
+      setHeight(minHeight)
+    } else {
       setHeight(maxHeight)
     }
   }
 
   useEffect(() => {
     const handleResize = () => {
-      const newMaxHeight = window.innerHeight * 0.85
+      const newMaxHeight = window.innerHeight * 0.8
       if (height > newMaxHeight) {
         setHeight(newMaxHeight)
       }
@@ -104,12 +121,14 @@ export default function BottomSheet({
       ref={containerRef}
       style={{ height: `${height}px` }}
     >
-      <DragHandle
+      <DragHandleArea
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-      />
-      <Content style={{ height: `${height - 32}px` }}>
+      >
+        <DragHandle />
+      </DragHandleArea>
+      <Content style={{ height: `${height - 60}px` }}>
         {children}
       </Content>
     </Container>
