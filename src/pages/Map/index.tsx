@@ -434,7 +434,7 @@ export default function MapPage() {
                 </SectionTitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src={selectedMemory.url || "/images/placeholder-spot.png"}
+                    src={selectedMemory.url || "https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=300&fit=crop"}
                     alt="메모리"
                   />
                 </DetailImageWrapper>
@@ -449,7 +449,7 @@ export default function MapPage() {
                 <SpotSubtitle>관광명소</SpotSubtitle>
                 <DetailImageWrapper>
                   <DetailImage
-                    src="/images/placeholder-spot.png"
+                    src="https://images.unsplash.com/photo-1598981457915-aea220950616?w=400&h=300&fit=crop"
                     alt={selectedPlace.name}
                   />
                 </DetailImageWrapper>
