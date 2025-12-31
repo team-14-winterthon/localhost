@@ -21,7 +21,7 @@ const MapPageContainer = styled.div`
 const CameraButton = styled.button`
   position: absolute;
   right: 20px;
-  bottom: 220px;
+  bottom: 226px;
   width: 48px;
   height: 48px;
   border: none;
